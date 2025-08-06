@@ -112,7 +112,7 @@ const getToken = async (req, res) => {
     try {
         const refreshToken = req.cookies.refreshToken;
         if(!refreshToken) {
-            res.status(401).json({
+            return res.status(401).json({
                 status: 'Error',
                 message: 'Unavailable refresh token'
             });
@@ -120,13 +120,13 @@ const getToken = async (req, res) => {
 
         jwt.verify(refreshToken, process.env.REFRESH_TOKEN, (err, user) => {
             if (err) {
-                return res.status('403').json({
+                return res.status(403).json({
                     status: 'fail',
                     message: 'Invalid or expired refresh token'
                 });
             }
 
-            const newAcessToken = jwt.sign(
+            const newAccessToken = jwt.sign(
                 {
                     id: user.id,
                     username: user.username,
@@ -138,14 +138,14 @@ const getToken = async (req, res) => {
             return res.status(200).json({
                 status: 'success',
                 message: 'Access token refreshed successfully',
-                accessToken: newAcessToken 
+                accessToken: newAccessToken 
             });
         });
     } catch (error) {
         res.status(500).json({
             status: 'error',
             message: 'Internal server error',
-            error: message.error
+            error: error.message
         });
     }
 }  
