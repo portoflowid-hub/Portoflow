@@ -29,7 +29,8 @@ const register = async (req, res) => {
             email, 
             password: hashedPassword,
             dateOfBirth,
-            gender
+            gender,
+            role: 'user'
         });
 
         await user.save();
@@ -37,6 +38,34 @@ const register = async (req, res) => {
         res.status(201).json({
             status: 'success',
             message: 'User registered successfully'
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'error',
+            error: error.message
+        });
+    }
+}
+
+const registerAdmin = async (req, res) => {
+    try {
+        const {fullName, username, email, password, dateOfBirth, gender} = req.body;
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const admin = new User({
+            fullName,
+            username,
+            email,
+            password: hashedPassword,
+            dateOfBirth,
+            gender,
+            role: 'admin'
+        });
+
+        await admin.save();
+        res.status(201).json({
+            status: 'success',
+            message: 'Admin registered successfully'
         });
     } catch (error) {
         res.status(500).json({
@@ -55,7 +84,7 @@ const login = async (req, res) => {
         });
 
         if (!user) {
-            return res.status(400).json({
+            return res.status(404).json({
                 status: 'fail',
                 message: 'User not found'
             });
@@ -98,7 +127,9 @@ const login = async (req, res) => {
 
         res.status(200).json({
             message: 'Login Successfully',
-            accessToken: accessToken 
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            role: user.role
         });
     } catch (error) {
         res.status(500).json({
@@ -269,4 +300,4 @@ const deleteUser = async (req, res) => {
     }
 }
 
-export {login, register, getAllUsers, getUser, deleteUser, updateUser, getToken};
+export {login, register, getAllUsers, getUser, deleteUser, updateUser, getToken, registerAdmin};
