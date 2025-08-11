@@ -47,34 +47,6 @@ const register = async (req, res) => {
     }
 }
 
-const registerAdmin = async (req, res) => {
-    try {
-        const {fullName, username, email, password, dateOfBirth, gender} = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const admin = new User({
-            fullName,
-            username,
-            email,
-            password: hashedPassword,
-            dateOfBirth,
-            gender,
-            role: 'admin'
-        });
-
-        await admin.save();
-        res.status(201).json({
-            status: 'success',
-            message: 'Admin registered successfully'
-        });
-    } catch (error) {
-        res.status(500).json({
-            status: 'error',
-            error: error.message
-        });
-    }
-}
-
 const login = async (req, res) => {
     try {
         const {email, username, password} = req.body;
@@ -119,6 +91,9 @@ const login = async (req, res) => {
                 expiresIn: '7d'
             }
         )
+        
+        user.refreshToken = refreshToken;
+        await user.save();
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
@@ -148,6 +123,15 @@ const getToken = async (req, res) => {
                 message: 'Unavailable refresh token'
             });
         }
+
+        const storedUser = await User.findOne({ refreshToken });
+        if (!storedUser) {
+            return res.status(403).json({
+                status: 'fail',
+                message: 'Refresh token not found or already revoked'
+            });
+        }
+
 
         jwt.verify(refreshToken, process.env.REFRESH_TOKEN, (err, user) => {
             if (err) {
@@ -300,4 +284,4 @@ const deleteUser = async (req, res) => {
     }
 }
 
-export {login, register, getAllUsers, getUser, deleteUser, updateUser, getToken, registerAdmin};
+export {login, register, getAllUsers, getUser, deleteUser, updateUser, getToken};

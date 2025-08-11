@@ -33,13 +33,15 @@ const userSchema = new mongoose.Schema({
     },
     gender: {
         type: String,
+        enum: ['male', 'female', 'other', 'prefer_not_to_say'],
         required: true
     },
     role: {
         type: String,
-        enum: ['admin', 'user'],
+        enum: ['admin', 'user', 'instructor', 'ta'],
         default: 'user'
     },
+    avatarUrl: {type: String, trim: true, default: ''},
     refreshToken: {
         type: String,
         default: null
