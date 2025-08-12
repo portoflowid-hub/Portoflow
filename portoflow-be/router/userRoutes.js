@@ -6,7 +6,8 @@ import {
     getUser,
     deleteUser,
     updateUser,
-    getToken
+    getToken,
+    logout
 } from '../controller/userController.js';
 import verifyToken from '../middleware/auth.js';
 
@@ -19,5 +20,6 @@ userRouter.get('/api/user/:id', verifyToken, getUser);
 userRouter.delete('/api/user/:id', verifyToken, deleteUser);
 userRouter.put('/api/user/:id', verifyToken, updateUser);
 userRouter.post('/api/getToken', getToken);
+userRouter.post('/api/logout', logout);
 
 export default userRouter;

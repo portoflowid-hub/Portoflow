@@ -42,13 +42,11 @@ export const enrollCourse = async (req, res) => {
     await session.commitTransaction()
     session.endSession()
 
-    return res
-      .status(201)
-      .json({
-        status: 'success',
-        message: 'Enrolled successfully',
-        data: enrollment[0]
-      })
+    return res.status(201).json({
+      status: 'success',
+      message: 'Enrolled successfully',
+      data: enrollment[0]
+    })
   } catch (err) {
     await session.abortTransaction()
     session.endSession()
@@ -104,13 +102,11 @@ export const listCourseStudents = async (req, res) => {
       Enrollment.countDocuments(filter)
     ])
 
-    return res
-      .status(200)
-      .json({
-        status: 'success',
-        data: rows,
-        meta: { total, page: Number(page), limit: Number(limit) }
-      })
+    return res.status(200).json({
+      status: 'success',
+      data: rows,
+      meta: { total, page: Number(page), limit: Number(limit) }
+    })
   } catch (err) {
     return res.status(500).json({ status: 'error', message: err.message })
   }

@@ -4,12 +4,7 @@ import Enrollment from '../models/Enrollment.js'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
-const ALLOWED_ROLES = [
-  'admin',
-  'instructor',
-  'ta',
-  'student'
-]
+const ALLOWED_ROLES = ['admin', 'instructor', 'ta', 'student']
 
 // Helper: generate tokens and set cookies
 const generateTokens = async (user, res) => {
@@ -28,8 +23,8 @@ const generateTokens = async (user, res) => {
   })
 
   //Save refreshToken in database
-  user.refreshToken = refreshToken;
-  await user.save();
+  user.refreshToken = refreshToken
+  await user.save()
 
   // Set httpOnly cookie for refresh token (used to refresh accessToken)
   res.cookie('refreshToken', refreshToken, {
@@ -141,57 +136,77 @@ export const loginAdmin = async (req, res) => {
 // Refresh access token using refreshToken cookie (with rotation)
 export const refreshTokenAdmin = async (req, res) => {
   try {
-    const oldRefreshToken = req.cookies?.refreshToken;
+    const oldRefreshToken = req.cookies?.refreshToken
     if (!oldRefreshToken) {
-      return res.status(401).json({ status: 'fail', message: 'Unavailable refresh token' });
+      return res
+        .status(401)
+        .json({ status: 'fail', message: 'Unavailable refresh token' })
     }
 
-    const user = await User.findOne({ refreshToken: oldRefreshToken });
+    const user = await User.findOne({ refreshToken: oldRefreshToken })
     if (!user) {
-      return res.status(403).json({ status: 'fail', message: 'Refresh token not found in DB' });
+      return res
+        .status(403)
+        .json({ status: 'fail', message: 'Refresh token not found in DB' })
     }
 
-    jwt.verify(oldRefreshToken, process.env.REFRESH_TOKEN, async (err, decoded) => {
-      if (err) {
-        return res.status(403).json({ status: 'fail', message: 'Invalid or expired refresh token' });
+    jwt.verify(
+      oldRefreshToken,
+      process.env.REFRESH_TOKEN,
+      async (err, decoded) => {
+        if (err) {
+          return res
+            .status(403)
+            .json({
+              status: 'fail',
+              message: 'Invalid or expired refresh token'
+            })
+        }
+
+        // Buat payload baru
+        const payload = {
+          id: decoded.id,
+          username: decoded.username,
+          role: decoded.role
+        }
+
+        // Generate accessToken baru
+        const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
+          expiresIn: '15m'
+        })
+
+        // Generate refreshToken baru (ROTASI)
+        const newRefreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN, {
+          expiresIn: '7d'
+        })
+
+        // Simpan refreshToken baru di DB
+        user.refreshToken = newRefreshToken
+        await user.save()
+
+        // Set cookie baru
+        res.cookie('refreshToken', newRefreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        })
+
+        return res.status(200).json({ status: 'success', accessToken })
       }
-
-      // Buat payload baru
-      const payload = { id: decoded.id, username: decoded.username, role: decoded.role };
-
-      // Generate accessToken baru
-      const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '15m' });
-
-      // Generate refreshToken baru (ROTASI)
-      const newRefreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN, { expiresIn: '7d' });
-
-      // Simpan refreshToken baru di DB
-      user.refreshToken = newRefreshToken;
-      await user.save();
-
-      // Set cookie baru
-      res.cookie('refreshToken', newRefreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-      });
-
-      return res.status(200).json({ status: 'success', accessToken });
-    });
+    )
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    res.status(500).json({ status: 'error', message: error.message })
   }
-};
-
+}
 
 // Logout admin — clear refresh cookie
 export const logoutAdmin = async (req, res) => {
   try {
-    const refreshToken = req.cookies?.refreshToken;
-    
+    const refreshToken = req.cookies?.refreshToken
+
     if (refreshToken) {
-      await User.findOneAndUpdate({ refreshToken }, { refreshToken: null });
+      await User.findOneAndUpdate({ refreshToken }, { refreshToken: null })
     }
 
     res.clearCookie('refreshToken', {
@@ -249,26 +264,28 @@ export const getAllEnrollmentsAdmin = async (req, res) => {
     const enrollments = await Enrollment.find()
       .populate('user', 'fullName username email')
       .populate('course', 'title')
-      .sort({ enrolledAt: -1 });
-    res.status(200).json({ status: 'success', data: enrollments });
+      .sort({ enrolledAt: -1 })
+    res.status(200).json({ status: 'success', data: enrollments })
   } catch (err) {
-    res.status(500).json({ status: 'error', message: err.message });
+    res.status(500).json({ status: 'error', message: err.message })
   }
-};
+}
 
 // Delete an enrollment by ID
 export const deleteEnrollmentAdmin = async (req, res) => {
   try {
-    const { id } = req.params;
-    const deleted = await Enrollment.findByIdAndDelete(id);
+    const { id } = req.params
+    const deleted = await Enrollment.findByIdAndDelete(id)
     if (!deleted) {
-      return res.status(404).json({ status: 'fail', message: 'Enrollment not found' });
+      return res
+        .status(404)
+        .json({ status: 'fail', message: 'Enrollment not found' })
     }
-    res.status(200).json({ status: 'success', message: 'Enrollment deleted' });
+    res.status(200).json({ status: 'success', message: 'Enrollment deleted' })
   } catch (err) {
-    res.status(500).json({ status: 'error', message: err.message });
+    res.status(500).json({ status: 'error', message: err.message })
   }
-};
+}
 
 export const deleteUserAdmin = async (req, res) => {
   try {
@@ -277,7 +294,7 @@ export const deleteUserAdmin = async (req, res) => {
     if (!deleted) {
       return res.status(404).json({ status: 'fail', message: 'User not found' })
     }
-    await Enrollment.deleteMany({ user: id });
+    await Enrollment.deleteMany({ user: id })
     res
       .status(200)
       .json({ status: 'success', message: 'User deleted by admin' })
@@ -293,13 +310,13 @@ export const getAdminStats = async (req, res) => {
       User.countDocuments(),
       Course.countDocuments(),
       Enrollment.countDocuments()
-    ]);
+    ])
 
     res.status(200).json({
       status: 'success',
       data: { totalUsers, totalCourses, totalEnrollments }
-    });
+    })
   } catch (err) {
-    res.status(500).json({ status: 'error', message: err.message });
+    res.status(500).json({ status: 'error', message: err.message })
   }
-};
+}
