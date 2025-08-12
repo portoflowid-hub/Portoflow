@@ -84,7 +84,7 @@ export const unenrollCourse = async (req, res) => {
   }
 }
 
-// Admin / instructor: list students of a course (with pagination)
+// Admin / instructor: list students of a course
 export const listCourseStudents = async (req, res) => {
   try {
     const courseId = req.params.id

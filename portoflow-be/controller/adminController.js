@@ -22,7 +22,6 @@ const generateTokens = async (user, res) => {
     expiresIn: '7d'
   })
 
-  //Save refreshToken in database
   user.refreshToken = refreshToken
   await user.save()
 
@@ -92,8 +91,6 @@ export const createUserAdmin = async (req, res) => {
     })
     await newUser.save()
 
-    // Optionally: generate tokens for the created user (useful if you want to auto-login the created user)
-    // NOTE: usually admin creates other accounts but stays logged-in as admin. We still return an accessToken for convenience.
     const accessToken = generateTokens(newUser, res) // newUser, res, bool
 
     res.status(201).json({
@@ -121,10 +118,8 @@ export const loginAdmin = async (req, res) => {
       return res.status(400).json({ status: 'fail', message: 'Wrong password' })
     }
 
-    // Generate tokens and set refresh cookie
     const accessToken = await generateTokens(user, res)
 
-    // Return accessToken (client stores it and uses for Authorization header)
     res
       .status(200)
       .json({ status: 'success', message: 'Login successful', accessToken })
@@ -133,7 +128,7 @@ export const loginAdmin = async (req, res) => {
   }
 }
 
-// Refresh access token using refreshToken cookie (with rotation)
+// refreshToken cookie (with rotation)
 export const refreshTokenAdmin = async (req, res) => {
   try {
     const oldRefreshToken = req.cookies?.refreshToken
@@ -163,13 +158,11 @@ export const refreshTokenAdmin = async (req, res) => {
             })
         }
 
-        // Buat payload baru
         const payload = {
           id: decoded.id,
           username: decoded.username,
           role: decoded.role
         }
-
         // Generate accessToken baru
         const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
           expiresIn: '15m'
@@ -180,7 +173,6 @@ export const refreshTokenAdmin = async (req, res) => {
           expiresIn: '7d'
         })
 
-        // Simpan refreshToken baru di DB
         user.refreshToken = newRefreshToken
         await user.save()
 
