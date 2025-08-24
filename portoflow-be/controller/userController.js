@@ -79,7 +79,7 @@ const login = async (req, res) => {
     }
 
     const safeUserData = {
-      id: user.id,
+      id: user._id,
       username: user.username,
       role: user.role
     }
@@ -97,7 +97,7 @@ const login = async (req, res) => {
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 100
+      maxAge: 7 * 24 * 60 * 60 * 1000
     })
 
     res.status(200).json({

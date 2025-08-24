@@ -6,7 +6,14 @@ import path from 'path';
 //create project by user
 const createProject = async (req, res) => {
     try {
-        const { title, description, imageUrl, projectUrl, tags} = req.body;
+         if (!req.user || !req.user.id) {
+            return res.status(401).json({
+                status: 'fail',
+                message: 'Unauthorized: user not found in request'
+            });
+        }
+        
+        const { title, description, imageUrl, projectUrl, tags } = req.body;
 
         const newProject = await Project.create({
             title,
@@ -16,13 +23,6 @@ const createProject = async (req, res) => {
             tags,
             user: req.user.id
         });
-
-        if (!req.user || !req.user.id) {
-            return res.status(401).json({
-                status: 'fail',
-                message: 'Unauthorized: user not found in request'
-            });
-        }
 
         res.status(201).json({
             status: 'success',
