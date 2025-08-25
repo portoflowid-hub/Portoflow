@@ -1,0 +1,35 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --background-dark: #0D0C1D; 
+  --text-light: #F0F0F0;      
+  --text-secondary: #a8a4d1; 
+  --accent-purple: #7F5AF0;  
+  --button-bg: #FFFFFF;      
+  --button-text: #0D0C1D;     
+  --card-stroke: rgba(127, 90, 240, 0.3);
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
+    Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
+    sans-serif;
+
+  height: 100%; /*Jika tidak diatur, tinggi elemen body hanya akan mengikuti kontennya (bisa kurang dari tinggi layar).*/
+  width: 100%; /*praktik umum atau best practice*/
+  overflow-x: hidden; /*menghilangkan Scrollbar Horizontal*/
+  scroll-behavior: smooth;
+    
+  /* syintax umum -> background: radial-gradient(shape-position, color1, color2, ...); */
+  background: radial-gradient(circle at bottom, #312c84, #0b0415, #000); /*gradasi melingkar*/
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

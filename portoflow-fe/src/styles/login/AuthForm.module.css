@@ -1,0 +1,141 @@
+.pageWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 40px 24px;
+  background: radial-gradient(circle at bottom, #312c84, #0b0415, #000);
+}
+
+.formContainer {
+  width: 100%;
+  max-width: 420px;
+  padding: 40px;
+  background-color: rgba(23, 22, 45, 0.7);
+  border: 1px solid var(--card-stroke);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 40px rgba(127, 90, 240, 0.15);
+  text-align: center;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-light);
+  margin-bottom: 30px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.inputGroup {
+  width: 100%;
+  text-align: left;
+}
+
+.label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.input {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--text-secondary);
+  border-radius: 8px;
+  color: var(--text-light);
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 10px rgba(127, 90, 240, 0.3);
+}
+
+.submitButton {
+  width: 100%;
+  padding: 14px;
+  background-color: var(--accent-purple);
+  color: var(--text-light);
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.submitButton:hover {
+  filter: brightness(1.2);
+  transform: translateY(-2px);
+}
+
+.separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--text-secondary);
+  margin: 25px 0;
+  font-size: 0.9rem;
+}
+
+.separator::before,
+.separator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--text-secondary);
+}
+
+.separator:not(:empty)::before {
+  margin-right: .5em;
+}
+
+.separator:not(:empty)::after {
+  margin-left: .5em;
+}
+
+.googleButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  background-color: #FFFFFF;
+  color: #333333;
+  border: 1px solid var(--text-secondary);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.googleButton:hover {
+  background-color: #f0f0f0;
+}
+
+.redirectText {
+  margin-top: 30px;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.redirectText a {
+  color: var(--accent-purple);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.redirectText a:hover {
+  text-decoration: underline;
+}

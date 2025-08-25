@@ -1,0 +1,99 @@
+.navbar {
+  width: 100%;
+  padding: 20px 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  background: #000
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap : 8px;
+  color: #fff;
+}
+
+.navLinks {
+  display: flex;
+  gap: 32px;
+  font-size: 1rem;
+  border-radius: 90px;
+  border-bottom: 1px solid var(--card-stroke);
+  padding: 8px 16px;
+}
+
+.navLinks a {
+  color: var(--text-secondary);
+  transition: color 0.2s ease-in-out;
+}
+
+.navLinks a:hover {
+  color: var(--text-light);
+}
+
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.loginBtn {
+  font-weight: 500;
+  color: var(--text-light);
+}
+
+.signupBtn {
+  background-color: black;
+  color: #fff;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: transform 0.2s ease-in-out;
+  background: linear-gradient(180deg, #000, #212122);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ffff;
+}
+
+.signupBtn:hover {
+  transform: scale(1.05);
+}
+
+/* Tambahkan ini di akhir file src/styles/Navbar.module.css */
+
+.profileLink {
+  display: flex;
+  align-items: center;
+}
+
+.profileIcon {
+  border-radius: 50%;
+}
+
+.logoutBtn {
+  background: none;
+  border: 1px solid var(--text-secondary);
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.logoutBtn:hover {
+  border-color: var(--text-light);
+  color: var(--text-light);
+}

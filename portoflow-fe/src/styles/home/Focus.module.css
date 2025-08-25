@@ -1,0 +1,65 @@
+.focusSection {
+  padding-top: 100px;
+  padding-bottom: 300px;
+  text-align: center;
+}
+
+.headline {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 60px;
+  color: var(--text-light);
+}
+
+.cardsContainer {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: linear-gradient(145deg, #16152a, #100f1f);
+  padding: 30px;
+  border-radius: 20px;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid var(--card-stroke);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.imageContainer {
+  height: 150px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.cardTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 30px;
+  color: var(--text-light);
+}
+
+.detailButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 1px solid var(--text-secondary);
+  border-radius: 8px;
+  color: var(--text-light);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.detailButton:hover {
+  background-color: var(--accent-purple);
+  border-color: var(--accent-purple);
+  color: var(--text-light);
+}
+

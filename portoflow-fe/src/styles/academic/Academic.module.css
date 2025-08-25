@@ -1,0 +1,228 @@
+/* src/styles/academic/Academic.module.css */
+
+.pageWrapper {
+  color: var(--text-light);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 120px 24px 80px;
+}
+
+.headline {
+  text-align: center;
+  font-size: 2.8rem;
+  margin-bottom: 40px;
+}
+
+.filterBar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 40px;
+  width: 100%;
+}
+
+.dropdownContainer {
+  position: relative;
+  flex: 1;
+  max-width: 250px;
+}
+
+.searchContainer {
+  position: relative;
+  width: 100%;
+  flex: 3;
+  max-width: 900px;
+}
+
+.dropdownButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--card-stroke);
+  color: #111111;
+  border-radius: 20px;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.dropdownSelect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 20px 12px 50px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--card-stroke);
+  border-radius: 20px;
+  color: var(--text-light);
+  font-size: 1rem;
+}
+
+.searchInput::placeholder {
+  color: var(--text-secondary);
+}
+
+.searchIcon {
+  position: absolute;
+  top: 50%;
+  left: 20px;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+
+.cardBgImage, .cardOverlay {
+  border-radius: 16px;
+}
+
+.cardBgImage {
+  z-index: 1;
+}
+
+.cardOverlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 60%);
+  z-index: 2;
+}
+
+.lastCourseCard {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 50px;
+  color: var(--text-light);
+}
+
+.lastCourseContent {
+  position: absolute;
+  bottom: 30px;
+  left: 30px;
+  z-index: 3;
+}
+
+.lastCourseLabel {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+}
+
+.lastCourseTitle {
+  font-size: 2.5rem;
+  margin: 0;
+}
+
+.lastCourseEpisode {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin-top: 5px;
+}
+
+.courseGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 25px;
+}
+
+.courseCard {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  padding: 20px;
+  color: var(--text-light);
+}
+
+.courseCardTitle {
+  font-size: 1.25rem;
+  z-index: 3;
+}
+
+.newVideosSection {
+  margin-top: 80px;
+}
+
+.newVideosHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.newVideosTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-weight: 500;
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  background-color: #ff4d4d;
+  border-radius: 50%;
+}
+
+.navButtonsContainer {
+  display: flex;
+  gap: 10px;
+}
+
+.navButton {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--card-stroke);
+  color: var(--text-light);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.navButton:hover {
+  background-color: var(--accent-purple);
+}
+
+.videosCarousel {
+  display: flex;
+  gap: 25px;
+  overflow-x: auto;
+  padding: 20px 0;
+  scroll-snap-type: x mandatory;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.videosCarousel::-webkit-scrollbar {
+  display: none;
+}
+
+.videosCarousel .courseCard {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  width: 220px; /* <-- BARIS PERBAIKANNYA ADA DI SINI */
+}
