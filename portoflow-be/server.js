@@ -10,20 +10,27 @@ dotenv.config();
 
 const app = express();
 
-const PORT = process.env.PORT || 3000;
+// diubdah ke 3000 agar tidak bentrol dengan frontend
+const PORT = process.env.PORT || 5000;
 
-await connectedDB();
-app.use(express.json());
-app.use(cookieParser());
-app.use(userRouter);
-app.use(adminRouter);
-
+// Pindahkan CORS ke bagian atas sebelum middleware lainnya
+// Ini memastikan semua permintaan yang masuk akan diperiksa kebijakannya terlebih dahulu
 app.use(
   cors({
     origin: "http://localhost:3000", 
     credentials: true,
   })
 );
+// middleware lainnya
+app.use(express.json());
+app.use(cookieParser());
+
+// router setelah middleware
+app.use(userRouter);
+app.use(adminRouter);
+
+// Panggil koneksi DB
+await connectedDB();
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

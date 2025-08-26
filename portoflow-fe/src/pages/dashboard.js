@@ -25,7 +25,7 @@ const DashboardPage = () => {
       }
 
       try {
-        // <-- PERUBAHAN 2: Cara pemanggilan fungsi
+        // pemanggilan fungsi
         const decodedToken = jwtDecode(token); 
         const userId = decodedToken.id;
 
