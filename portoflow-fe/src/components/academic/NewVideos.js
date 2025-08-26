@@ -1,5 +1,3 @@
-// src/components/academic/NewVideos.js
-
 import { useRef } from 'react';
 import Image from 'next/image';
 import styles from '@/styles/academic/Academic.module.css';

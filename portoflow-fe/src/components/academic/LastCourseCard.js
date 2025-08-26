@@ -1,21 +1,22 @@
-// src/components/academic/LastCourseCard.js
-
 import Image from 'next/image';
 import styles from '@/styles/academic/Academic.module.css';
-import { coursesData } from '@/data/academicData';
 
-const LastCourseCard = () => {
-  // Anggap kursus terakhir adalah kursus pertama dari data
-  const lastCourse = coursesData[0];
+const LastCourseCard = ({ course }) => {
+  if (!course) {
+    // Tampilkan sesuatu jika tidak ada kursus terakhir
+    return <div className={styles.lastCourseCard}>Tidak ada kursus untuk ditampilkan.</div>;
+  }
 
   return (
     <div className={styles.lastCourseCard}>
-      <Image src={lastCourse.image} alt={lastCourse.title} layout="fill" objectFit="cover" className={styles.cardBgImage} />
+      {/* Gunakan imageUrl dari data backend */}
+      <Image src={course.imageUrl || '/default-course-image.png'} alt={course.title} layout="fill" objectFit="cover" className={styles.cardBgImage} />
       <div className={styles.cardOverlay}></div>
       <div className={styles.lastCourseContent}>
         <span className={styles.lastCourseLabel}>Your last course</span>
-        <h2 className={styles.lastCourseTitle}>{lastCourse.title}</h2>
-        <p className={styles.lastCourseEpisode}>{lastCourse.episode}</p>
+        <h2 className={styles.lastCourseTitle}>{course.title}</h2>
+        {/* Sesuaikan dengan data yang ada, misal 'level' atau 'category' */}
+        <p className={styles.lastCourseEpisode}>{course.category || course.level}</p>
       </div>
     </div>
   );

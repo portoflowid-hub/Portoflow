@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import connectedDB from './config/db.js';
 import userRouter from './router/userRoutes.js';
 import adminRouter from './router/adminRoutes.js';
+import courseRouter from './router/courseRoutes.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
@@ -28,6 +29,7 @@ app.use(cookieParser());
 // router setelah middleware
 app.use(userRouter);
 app.use(adminRouter);
+app.use(courseRouter);
 
 // Panggil koneksi DB
 await connectedDB();
