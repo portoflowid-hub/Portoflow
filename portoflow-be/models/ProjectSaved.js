@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const projectLikeSchema = new mongoose.Schema({
+const projectSavedSchema = new mongoose.Schema({
     projectId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
@@ -11,13 +11,13 @@ const projectLikeSchema = new mongoose.Schema({
         required: true,
         ref: 'User'
     },
-    likedAt: {
+    savedAt: {
         type: Date,
         required: true,
         default: Date.now
     }
 });
 
-const   ProjectLike = mongoose.model('ProjectLike', projectLikeSchema);
+const ProjectSaved = mongoose.model('ProjectSaved', projectSavedSchema);
 
-export default ProjectLike;
+export default ProjectSaved;
