@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
 
 const projectSchema = new mongoose.Schema({
+    ownerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'User'
+    },
     title: {
         type: String, 
         required: [true, 'Project title is required'],
@@ -11,6 +16,18 @@ const projectSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Project description is required'],
         trim: true
+    },
+    isGroup: {
+        type: Boolean,
+        required: true
+    },
+    repoUrl: {
+        type: String,
+        default: null
+    },
+    liveDemoUrl: {
+        type: String,
+        default: null
     },
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -25,7 +42,41 @@ const projectSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    tags: [String]
+    tags: [String],
+    members: [{
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: 'User'
+        },
+        role: {
+            type: String,
+            required: true
+        },
+        joinedAt: {
+            type: Date,
+            required: true
+        }
+    }],
+    stats: {
+        likesCount: {
+            type: Number,
+            default: 0
+        },
+        commentsCount: {
+            type: Number,
+            default: 0
+        },
+        savesCount: {
+            types: Number,
+            default: 0
+        }
+    },
+    status: {
+        type: String,
+        enum: ['ongoing', 'completed', 'archived'],
+        default: 'ongoing'
+    }
 }, {
     timestamps: true
 });
