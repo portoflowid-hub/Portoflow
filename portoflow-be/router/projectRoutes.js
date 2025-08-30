@@ -2,14 +2,12 @@ import express from 'express';
 import {
     createProject, 
     getMyProjects, 
-    getProjectById, 
-    getProjectsByUsername, 
     getProjectsByTag, 
     updateProject, 
     deleteProject, 
-    searchProjects
-} from '../controller/projectController.js';
+} from '../controller/project/projectController.js';
 
+import { getProjectsByUsername, getProjectsByTag, searchProjects } from '../controller/project/projectQueryController.js'
 import verifyToken from '../middleware/auth.js';
 
 const projectRouter = express.Router();
