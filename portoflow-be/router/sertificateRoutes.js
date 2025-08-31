@@ -5,7 +5,7 @@ import {
   getCertificateById,
   updateCertificate,
   deleteCertificate
-} from '../controllers/certificate.controller.js';
+} from '../controller/sertificateController.js';
 
 const router = express.Router();
 

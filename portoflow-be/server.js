@@ -4,7 +4,7 @@ import connectedDB from './config/db.js';
 import userRouter from './router/userRoutes.js';
 import adminRouter from './router/adminRoutes.js';
 import courseRouter from './router/courseRoutes.js';
-import certificateRoutes from './routes/certificate.routes.js';
+import sertificateRouter from './router/sertificateRoutes.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
@@ -31,7 +31,7 @@ app.use(cookieParser());
 app.use(userRouter);
 app.use(adminRouter);
 app.use(courseRouter);
-app.use(certificateRoutes);
+app.use(sertificateRouter);
 
 // Panggil koneksi DB
 await connectedDB();
