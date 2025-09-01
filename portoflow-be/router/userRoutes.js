@@ -8,7 +8,7 @@ import {
     updateUser,
     getToken,
     logout
-} from '../controller/userController.js';
+} from '../controller/user/userController.js';
 import verifyToken from '../middleware/auth.js';
 
 const userRouter = express.Router();

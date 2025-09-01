@@ -68,7 +68,7 @@ const projectSchema = new mongoose.Schema({
             default: 0
         },
         savesCount: {
-            types: Number,
+            type: Number,
             default: 0
         }
     },

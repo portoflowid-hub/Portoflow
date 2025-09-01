@@ -2,7 +2,6 @@ import ProjectLike from '../../models/project/ProjectLike.js';
 import ProjectComment from '../../models/project/ProjectComment.js';
 import ProjectSaved from '../../models/project/ProjectSaved.js';
 import Project from '../../models/project/Project.js';
-import User from '../../models/user/User.js';
 
 //like project (public)
 const likeProject = async (req, res) => {
@@ -11,7 +10,7 @@ const likeProject = async (req, res) => {
 
     try {
         //check wheter the user has already liked it
-        const existingLike = await ProjectLike.findOne({project_id: projectId}, {user_id: userId});
+        const existingLike = await ProjectLike.findOne({projectId}, {userId});
         if (existingLike) {
             return res.status(409).json({
                 status: 'fail',
@@ -20,7 +19,7 @@ const likeProject = async (req, res) => {
         }
 
         //create new documment like
-        await ProjectLike.create({project_id: projectId}, {user_id: userId});
+        await ProjectLike.create({projectId}, {userId});
 
         //add the number of likes to the project documment
         await Project.findByIdAndUpdate(projectId, {$inc: {'stats.likesCount': 1}});
@@ -44,7 +43,7 @@ const unlikeProject = async (req, res) => {
     const userId = req.user.id;
 
     try {
-        const result = await ProjectLike.deleteOne({project_id: projectId}, {user_id: userId});
+        const result = await ProjectLike.deleteOne({projectId}, {userId});
 
         if (result.deletedCount === 0) {
             return res.status(404).json({
@@ -68,3 +67,131 @@ const unlikeProject = async (req, res) => {
         });
     }
 }
+
+//save project (public)
+const saveProject = async (req, res) => {
+    const {projectId} = req.params;
+    const userId = req.user.id;
+
+    try {
+        //check if public has already save the project
+        const existingSave = await ProjectSaved.findOne({projectId}, {userId});
+        if (existingSave) {
+            return res.status(409).json({
+                status: 'fail',
+                message: 'Project already saved by this user'
+            });
+        }
+
+        await ProjectSaved.create({projectId}, {userId});
+        await Project.findByIdAndUpdate(projectId, {$inc: {'stats.savesCount': 1}});
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Project saved successfully'
+        });
+    } catch (err) {
+        res.status(500).json({
+            status: 'fail',
+            message: 'Failed to saved project',
+            error: err.message
+        });
+    }
+}
+
+//unsave project (public)
+const unsaveProject = async (req, res) => {
+    const {projectId} = req.params;
+    const userId = req.user.id;
+
+    try {
+        //check wheter the user has already saved it
+        const result = await ProjectSaved.deleteOne({projectId}, {userId});
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                status: 'fail',
+                message: 'Project saved not found'
+            });
+        }
+
+        await Project.findByIdAndUpdate(projectId, {$inc: {'stats.savesCount': -1}});
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Project unsaved successfully'
+        });
+    } catch (err) {
+        res.status(500).json({
+            status: 'fail',
+            message: 'Failed to unsaved project',
+            error: err.message
+        });
+    }
+}
+
+//for public comment the project
+const addComment = async (req, res) => {
+    const {projectId} = req.params;
+    const {commentText, parentCommentId} = req.body;
+    const userId = req.user.id;
+
+    try {
+        //create comment on the project
+        const comment = new Project({
+            projectId,
+            userId,
+            commentText,
+            parentCommentId: parentCommentId || null
+        });
+
+        //save comment to database
+        await comment.save();
+
+        //update the count of comment to stats project
+        await Project.findByIdAndUpdate(projectId, {$inc: {'stats.commentsCount': 1}});
+
+        res.status(201).json({
+            status: 'success',
+            message: 'Comment added successfully',
+            data: comment
+        });
+    } catch (err) {
+        res.status(500).json({
+            status: 'fail',
+            message: 'Failed to added comment',
+            error: err.message
+        });
+    }
+}
+
+//delete comment on the project (public)
+const deleteComment = async (req, res) => {
+    const commentId = req.params;
+
+    try {
+        const deletedComment = await ProjectComment.findByIdAndDelete(commentId);
+
+        if (!deletedComment) {
+            return res.status(404).json({
+                status: 'fail',
+                message: 'Project comment not found'
+            });
+        }
+
+        //update the comment count on the stats project
+        await Project.findByIdAndUpdate(deletedComment.projectId, {$inc: {'stats.commentsCount': -1}});
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Comment deleted successfully'
+        });
+    } catch (err) {
+        res.status(500).json({
+            status: 'fail',
+            message: 'Failed to delete comment',
+            error: err.message
+        });
+    }
+}
+
+export {likeProject, unlikeProject, saveProject, unsaveProject, addComment, deleteComment};

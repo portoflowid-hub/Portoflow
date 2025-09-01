@@ -7,14 +7,14 @@ import {
   loginAdmin,
   refreshTokenAdmin,
   logoutAdmin
-} from '../controller/adminController.js'
+} from '../controller/admin/adminController.js'
 
 import {
   getAllCourses,
   createCourse,
   updateCourse,
   deleteCourse
-} from '../controller/courseController.js'
+} from '../controller/course/courseController.js'
 
 import verifyToken from '../middleware/auth.js'
 import { authorizeRoles } from '../middleware/roleCheck.js'

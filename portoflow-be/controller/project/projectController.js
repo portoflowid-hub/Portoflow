@@ -18,6 +18,15 @@ const createProject = async (req, res) => {
 
         const { title, description, imageUrl, projectUrl, tags } = req.body;
 
+        //check whether the project is exist
+        const existingProject = await Project.findOne({title});
+        if (existingProject) {
+            return res.status(409).json({
+                status: 'fail',
+                message: 'Project already exist'
+            });
+        }
+
         const newProject = await Project.create({
             title,
             description,
@@ -171,7 +180,6 @@ const deleteProject = async (req, res) => {
 export {
     createProject,
     getMyProjects,
-    deleteProject,
     updateProject,
     deleteProject,
     getProjectById
