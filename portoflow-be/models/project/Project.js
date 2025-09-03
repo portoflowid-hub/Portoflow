@@ -29,11 +29,6 @@ const projectSchema = new mongoose.Schema({
         type: String,
         default: null
     },
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
     imageUrl: {
         type: String,
         required: true
@@ -80,6 +75,9 @@ const projectSchema = new mongoose.Schema({
 }, {
     timestamps: true
 });
+
+//create text index for search project
+projectSchema.index({title: 'text', description: 'text', tags: 'text'});
 
 const Project = mongoose.model('Project', projectSchema);
 

@@ -10,7 +10,7 @@ const likeProject = async (req, res) => {
 
     try {
         //check wheter the user has already liked it
-        const existingLike = await ProjectLike.findOne({projectId}, {userId});
+        const existingLike = await ProjectLike.findOne({projectId, userId});
         if (existingLike) {
             return res.status(409).json({
                 status: 'fail',
@@ -19,7 +19,7 @@ const likeProject = async (req, res) => {
         }
 
         //create new documment like
-        await ProjectLike.create({projectId}, {userId});
+        await ProjectLike.create({projectId, userId});
 
         //add the number of likes to the project documment
         await Project.findByIdAndUpdate(projectId, {$inc: {'stats.likesCount': 1}});
@@ -43,7 +43,7 @@ const unlikeProject = async (req, res) => {
     const userId = req.user.id;
 
     try {
-        const result = await ProjectLike.deleteOne({projectId}, {userId});
+        const result = await ProjectLike.deleteOne({projectId, userId});
 
         if (result.deletedCount === 0) {
             return res.status(404).json({
@@ -53,7 +53,7 @@ const unlikeProject = async (req, res) => {
         }
 
         //reduce the number of likes in the project
-        await Project.findByIdAndUpdate({projectId}, {$inc: {'stats.likesCount': -1}})
+        await Project.findByIdAndUpdate(projectId, {$inc: {'stats.likesCount': -1}})
 
         res.status(200).json({
             status: 'success',
@@ -75,7 +75,7 @@ const saveProject = async (req, res) => {
 
     try {
         //check if public has already save the project
-        const existingSave = await ProjectSaved.findOne({projectId}, {userId});
+        const existingSave = await ProjectSaved.findOne({projectId, userId});
         if (existingSave) {
             return res.status(409).json({
                 status: 'fail',
@@ -83,7 +83,7 @@ const saveProject = async (req, res) => {
             });
         }
 
-        await ProjectSaved.create({projectId}, {userId});
+        await ProjectSaved.create({projectId, userId});
         await Project.findByIdAndUpdate(projectId, {$inc: {'stats.savesCount': 1}});
 
         res.status(200).json({
@@ -106,7 +106,7 @@ const unsaveProject = async (req, res) => {
 
     try {
         //check wheter the user has already saved it
-        const result = await ProjectSaved.deleteOne({projectId}, {userId});
+        const result = await ProjectSaved.deleteOne({projectId, userId});
         if (result.deletedCount === 0) {
             return res.status(404).json({
                 status: 'fail',
@@ -137,7 +137,7 @@ const addComment = async (req, res) => {
 
     try {
         //create comment on the project
-        const comment = new Project({
+        const comment = new ProjectComment({
             projectId,
             userId,
             commentText,
@@ -153,7 +153,7 @@ const addComment = async (req, res) => {
         res.status(201).json({
             status: 'success',
             message: 'Comment added successfully',
-            data: comment
+            data: comment,
         });
     } catch (err) {
         res.status(500).json({
@@ -166,7 +166,7 @@ const addComment = async (req, res) => {
 
 //delete comment on the project (public)
 const deleteComment = async (req, res) => {
-    const commentId = req.params;
+    const {commentId} = req.params;
 
     try {
         const deletedComment = await ProjectComment.findByIdAndDelete(commentId);
@@ -194,4 +194,56 @@ const deleteComment = async (req, res) => {
     }
 }
 
-export {likeProject, unlikeProject, saveProject, unsaveProject, addComment, deleteComment};
+//get all comments
+const getProjectComments = async (req, res) => {
+    const {projectId} = req.params;
+    
+    try {
+        const comments = await ProjectComment.find({projectId}).lean();
+
+        if (!comments || comments.length === 0) {
+            return res.status(404).json({
+                status: 'fail',
+                message: 'No comments found for this project'
+            });
+        }
+
+        //create map to access based comment id
+        const commentMap = new Map();
+        comments.forEach(comment => {
+            commentMap.set(comment._id.toString(), {...comment, replies: []});
+        });
+
+        const organizedComments = [];
+
+        //loop to organize comment
+        commentMap.forEach(comment => {
+            if (comment.parentCommentId) {
+                const parent = commentMap.get(comment.parentCommentId.toString());
+                if (parent) {
+                    parent.replies.push(comment);
+                }
+            } else {
+                organizedComments.push(comment);
+            }
+        });
+
+        // Filter out replies from the main list if you want a clean parent array
+        const finalComments = organizedComments.filter(comment => !comment.parentComentId);
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Comments found',
+            data: finalComments
+        });
+    } catch (err) {
+        res.status(500).json({
+            status: 'fail',
+            message: 'Failed to retrieve comments',
+            error: err.message
+        });
+    }
+}
+
+
+export {likeProject, unlikeProject, saveProject, unsaveProject, addComment, deleteComment, getProjectComments};

@@ -7,7 +7,7 @@ const getProjectsByUsername = async (req, res) => {
         const { username } = req.params;
 
         //find user by username
-        const user = await User.find({ username }).select('_id');
+        const user = await User.findOne({ username }).select('_id');
         if (!user) {
             return res.status(404).json({
                 status: 'fail',
@@ -16,10 +16,10 @@ const getProjectsByUsername = async (req, res) => {
         }
 
         //Take all projects related to user ID
-        const projects = await Project.findOne({ user: user._id }).lean();
+        const projects = await Project.find({ ownerId: user._id }).lean();
         res.status(200).json({
             status: 'success',
-            message: `{$username}'s project found`,
+            message: `${username}'s project was found`,
             data: projects
         });
     } catch (err) {
@@ -68,8 +68,17 @@ const searchProjects = async (req, res) => {
                 message: 'Search query is required'
             });
         }
+        
+        //using regex to search for a fragment of a word
+        const searchPattern = new RegExp(q, 'i');
 
-        const projects = await Project.find({ $text: { $search: q } }).lean();
+        const projects = await Project.find({
+            $or: [
+                {title: {$regex: searchPattern}},
+                {description: {$regex: searchPattern}},
+                {tags: {$regex: searchPattern}}
+            ]
+        }).lean();
 
         if (!projects || projects.length === 0) {
             return res.status(404).json({

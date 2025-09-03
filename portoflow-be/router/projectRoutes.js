@@ -13,7 +13,8 @@ import {
     saveProject,
     unsaveProject,
     addComment,
-    deleteComment
+    deleteComment,
+    getProjectComments
 } from '../controller/project/projectInteractionController.js';
 
 import { getProjectsByUsername, getProjectsByTag, searchProjects } from '../controller/project/projectQueryController.js'
@@ -27,20 +28,20 @@ projectRouter.post('/api/createProject', verifyToken, createProject);
 //get all my projects
 projectRouter.get('/api/getProjects', verifyToken, getMyProjects);
 
-//get project by id (just owner)
+//get project by project id (just owner)
 projectRouter.get('/api/getProject/:id', verifyToken, getProjectById);
 
 //get projects by username (public)
-projectRouter.get('/api/getProjects/:username', verifyToken, getProjectsByUsername);
+projectRouter.get('/api/getProjectsByUsername/:username', getProjectsByUsername);
 
 //get projects by tag (public)
-projectRouter.get('/api/getProjects/:tagname', getProjectsByTag);
+projectRouter.get('/api/getProjectsByTag/:tagname', getProjectsByTag);
 
 //update project by id(owner)
 projectRouter.put('/api/project/:id', verifyToken, updateProject);
 
 //delete project by id (owner)
-projectRouter.delete('/api/project/:id', verifyToken, deleteProject);
+projectRouter.delete('/api/project/:projectId', verifyToken, deleteProject);
 
 //search project (public)
 projectRouter.get('/api/searchProjects', searchProjects);
@@ -53,8 +54,9 @@ projectRouter.delete('/api/projects/:projectId/like', verifyToken, unlikeProject
 projectRouter.post('/api/projects/:projectId/save', verifyToken, saveProject);
 projectRouter.delete('/api/projects/:projectId/save', verifyToken, unsaveProject);
 
-//add comment and delete comment
+//add comment, delete comment, and get all comments on project
 projectRouter.post('/api/projects/:projectId/comment', verifyToken, addComment);
 projectRouter.delete('/api/comments/:commentId', verifyToken, deleteComment);
+projectRouter.get('/api/projects/:projectId/comments', getProjectComments);
 
 export default projectRouter;

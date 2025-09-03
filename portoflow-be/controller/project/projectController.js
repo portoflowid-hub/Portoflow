@@ -16,7 +16,8 @@ const createProject = async (req, res) => {
             });
         }
 
-        const { title, description, imageUrl, projectUrl, tags } = req.body;
+        const { title, description, isGroup, repoUrl, liveDemoUrl, imageUrl, projectUrl, tags, members } = req.body;
+        const ownerId = req.user.id;
 
         //check whether the project is exist
         const existingProject = await Project.findOne({title});
@@ -30,10 +31,14 @@ const createProject = async (req, res) => {
         const newProject = await Project.create({
             title,
             description,
+            isGroup,
+            repoUrl,
+            liveDemoUrl,
             imageUrl,
             projectUrl,
             tags,
-            user: req.user.id,
+            members,
+            ownerId
         });
 
         res.status(201).json({
@@ -47,12 +52,12 @@ const createProject = async (req, res) => {
             message: err.message,
         });
     }
-};
+}
 
-//get all user projects
+//get all my projects
 const getMyProjects = async (req, res) => {
     try {
-        const projects = await Project.find({ user: req.user.id }).sort({createdAt: -1});
+        const projects = await Project.find({ ownerId: req.user.id }).sort({createdAt: -1});
 
         res.status(200).json({
             status: "success",
@@ -65,13 +70,13 @@ const getMyProjects = async (req, res) => {
         message: err.message,
         });
     }
-};
+}
 
 //get user project by id
 const getProjectById = async (req, res) => {
     try {
         const { id } = req.params;
-        const project = await Project.findOne({ _id: id, user: req.user.id });
+        const project = await Project.findOne({ _id: id, ownerId: req.user.id });
 
         if (!project) {
             return res.status(404).json({
@@ -83,15 +88,15 @@ const getProjectById = async (req, res) => {
         res.status(200).json({
             status: "success",
             message: "Project found",
-            data: project,
+            data: project
         });
     } catch (err) {
         res.status(500).json({
             status: "fail",
-            message: err.message,
+            message: err.message
         });
     }
-};
+}
 
 //update project by id
 const updateProject = async (req, res) => {
@@ -100,7 +105,7 @@ const updateProject = async (req, res) => {
         const updates = req.body;
 
         const updatedProject = await Project.findOneAndUpdate(
-            { _id: id, user: req.user.id },
+            { _id: id, ownerId: req.user.id },
             updates,
             { new: true, runValidators: true }
         );
@@ -123,7 +128,7 @@ const updateProject = async (req, res) => {
             message: err.message,
         });
     }
-};
+}
 
 //delete project by id
 const deleteProject = async (req, res) => {
@@ -149,9 +154,9 @@ const deleteProject = async (req, res) => {
         }
 
         //delete all likes, comments, and saves that related with projectId
-        await ProjectLike.deleteMany({ project_id: projectId }, { session });
-        await ProjectComment.deleteMany({ project_id: projectId }, { session });
-        await ProjectSaved.deleteMany({ project_id: projectId }, { session });
+        await ProjectLike.deleteMany({ projectId }, { session });
+        await ProjectComment.deleteMany({ projectId }, { session });
+        await ProjectSaved.deleteMany({ projectId }, { session });
 
         await session.commitTransaction();
 
@@ -169,7 +174,7 @@ const deleteProject = async (req, res) => {
     } finally {
         session.endSession();
     }
-};
+}
 
 // //multer configuration for temporary storage
 // const storage = multer.memoryStorage(); //save file on memory

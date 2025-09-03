@@ -15,10 +15,10 @@ const projectCommentSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    parrentCommentId: {
+    parentCommentId: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'ProjectComment'
+        ref: 'ProjectComment',
+        default: null
     },
     deletedAt: {
         type: Date,
