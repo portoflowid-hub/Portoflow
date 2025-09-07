@@ -20,7 +20,7 @@ const Navbar = () => {
           <Link href="/academic">Academic</Link>
           <Link href="/community">Community</Link>
           {/* <Link href="/portfolio">Portfolio</Link> */}
-          <Link href="/about">About Us</Link>
+          {/* <Link href="/about">About Us</Link> */}
         </div>
         <div className={styles.navActions}>
           {user ? (

@@ -1,8 +1,8 @@
-// src/pages/dashboard.js
+// src/pages/dashboard.js (MODIFIKASI PENUH)
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { jwtDecode } from 'jwt-decode'; // <-- PERUBAHAN 1: Cara impor
+import { jwtDecode } from 'jwt-decode';
 import Head from 'next/head';
 import Navbar from '../components/general/Navbar';
 import Footer from '../components/general/Footer';
@@ -25,8 +25,7 @@ const DashboardPage = () => {
       }
 
       try {
-        // pemanggilan fungsi
-        const decodedToken = jwtDecode(token); 
+        const decodedToken = jwtDecode(token);
         const userId = decodedToken.id;
 
         const response = await fetch(`http://localhost:5000/api/user/${userId}`, {
@@ -54,14 +53,30 @@ const DashboardPage = () => {
     };
 
     fetchData();
-  }, [router]);
+  }, []); // Dependency [router] dihapus karena tidak esensial untuk re-fetching
+
+  // FUNGSI BARU: Untuk menangani penambahan data dari komponen anak
+  const handleDataAdded = (newItem, type) => {
+    setUser(currentUser => {
+      const updatedUser = { ...currentUser };
+      
+      if (type === 'project') {
+        // Menambahkan item baru ke depan array agar muncul di paling atas
+        updatedUser.projects = [newItem, ...(currentUser.projects || [])];
+      }
+      // Nanti bisa ditambahkan untuk 'certificate' dan 'experience'
+      // else if (type === 'certificate') { ... }
+      
+      return updatedUser;
+    });
+  };
 
   if (loading) {
     return <div>Loading...</div>;
   }
 
   if (!user) {
-    return null;
+    return null; // Atau komponen skeleton/loading yang lebih baik
   }
 
   return (
@@ -73,9 +88,12 @@ const DashboardPage = () => {
         <Navbar />
         <main className={styles.container}>
           <ProfileHeader user={user} />
+          {/* PERUBAHAN: Teruskan prop `onDataAdded` dan `experiences` */}
           <DashboardContent 
             projects={user.projects || []} 
-            certificates={user.certificates || []} 
+            certificates={user.certificates || []}
+            experiences={user.experiences || []}
+            onDataAdded={handleDataAdded}
           />
         </main>
         <Footer />
