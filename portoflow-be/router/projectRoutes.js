@@ -14,10 +14,12 @@ import {
     unsaveProject,
     addComment,
     deleteComment,
-    getProjectComments
+    getProjectComments 
 } from '../controller/project/projectInteractionController.js';
 
-import { getProjectsByUsername, getProjectsByTag, searchProjects } from '../controller/project/projectQueryController.js'
+import { getProjectsByUsername, getProjectsByTag, searchProjects } from '../controller/project/projectQueryController.js';
+import {removeMemberProject, updateMemberRole, addMemberProject} from '../controller/project/projectMemberController.js';
+import { getLikedProjects, getSavedProjects } from '../controller/project/userProjectController.js';
 import verifyToken from '../middleware/auth.js';
 
 const projectRouter = express.Router();
@@ -46,17 +48,24 @@ projectRouter.delete('/api/project/:projectId', verifyToken, deleteProject);
 //search project (public)
 projectRouter.get('/api/searchProjects', searchProjects);
 
-//like and unlike project
+//like, unlike projects, and get all projects that liked by user
 projectRouter.post('/api/projects/:projectId/like', verifyToken, likeProject);
 projectRouter.delete('/api/projects/:projectId/like', verifyToken, unlikeProject);
+projectRouter.get('/api/projects/likes', verifyToken, getLikedProjects);
 
-//save and unsave project
+//save, unsave prjects, and get all projects that saved by user
 projectRouter.post('/api/projects/:projectId/save', verifyToken, saveProject);
 projectRouter.delete('/api/projects/:projectId/save', verifyToken, unsaveProject);
+projectRouter.get('/api/projects/saves', verifyToken, getSavedProjects);
 
 //add comment, delete comment, and get all comments on project
 projectRouter.post('/api/projects/:projectId/comment', verifyToken, addComment);
 projectRouter.delete('/api/comments/:commentId', verifyToken, deleteComment);
 projectRouter.get('/api/projects/:projectId/comments', getProjectComments);
+
+//add, remove, and update members by owner project
+projectRouter.post('/api/projects/:projectId/members', verifyToken, addMemberProject);
+projectRouter.delete('/api/projects/:projectId/members', verifyToken, removeMemberProject);
+projectRouter.patch('/api/projects/:projectId/members/role', verifyToken, updateMemberRole);
 
 export default projectRouter;

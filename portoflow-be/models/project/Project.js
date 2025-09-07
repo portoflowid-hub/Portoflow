@@ -23,11 +23,25 @@ const projectSchema = new mongoose.Schema({
     },
     repoUrl: {
         type: String,
-        default: null
+        default: null,
+        validate: {
+            validator: (v) => {
+                if (v === null) return true; //allow null value
+                return /(https?:\/\/[^\s]+)/.test(v); //validation url
+            },
+            message: props => `${props.value} is not valid URL!`
+        }
     },
     liveDemoUrl: {
         type: String,
-        default: null
+        default: null,
+        validate: {
+            validator: (v) => {
+                if (v === null) return true; //allow nul value
+                return /(https?:\/\/[^\s]+)/.test(v); //validation url
+            },
+            message: props => `${props.value} is not valid URL!`
+        }
     },
     imageUrl: {
         type: String,

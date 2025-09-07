@@ -57,17 +57,31 @@ const createProject = async (req, res) => {
 //get all my projects
 const getMyProjects = async (req, res) => {
     try {
-        const projects = await Project.find({ ownerId: req.user.id }).sort({createdAt: -1});
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skipIndex = (page -1) * limit;
+
+        const totalProjects = await Project.countDocuments({ownerId: req.user.id});
+        const projects = await Project.find({ownerId: req.user.id})
+            .sort({createdAt: -1})
+            .limit(limit)
+            .skip(skipIndex)
+            .lean();
 
         res.status(200).json({
-            status: "success",
-            message: "Successfully displaying all my projects",
-            data: projects
+            status: 'success',
+            message: 'Successfully displaying all my projects',
+            data: projects,
+            pagination: {
+                totalProjects,
+                currentPage: page,
+                totalPages: Math.ceil(totalProjects / limit)
+            }
         });
     } catch (err) {
         res.status(500).json({
         status: "fail",
-        message: err.message,
+        message: err.message
         });
     }
 }
