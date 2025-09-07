@@ -1,18 +1,24 @@
-import express from 'express';
+import express from 'express'
 import {
   createCertificate,
   getCertificates,
   getCertificateById,
   updateCertificate,
   deleteCertificate
-} from '../controller/sertificateController.js';
+} from '../controller/sertificateController.js'
 
-const router = express.Router();
+const router = express.Router()
 
-router.post('/sertifi', createCertificate);
-router.get('/sertifi', getCertificates);
-router.get('/sertifi/:id', getCertificateById);
-router.put('/sertifi/:id', updateCertificate);
-router.delete('/sertifi/:id', deleteCertificate);
+// sertifikat agar client bisa ngupload sertifikat yang sudah dia dapatkan
 
-export default router;
+// Client
+router.post('/certificates/upload', uploadCertificate)
+router.get('/certificates/me', getMyCertificates)
+router.get('/certificates/:id', getCertificateById) //Client/Admin
+
+// Admin
+router.get('/certificates', getCertificates)
+router.put('/certificates/:id', updateCertificate)
+router.delete('/certificates/:id', deleteCertificate)
+
+export default router
