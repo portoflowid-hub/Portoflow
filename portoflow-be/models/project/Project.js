@@ -43,10 +43,10 @@ const projectSchema = new mongoose.Schema({
             message: props => `${props.value} is not valid URL!`
         }
     },
-    imageUrl: {
-        type: String,
-        required: true
-    },
+    // imageUrl: {
+    //     type: String,
+    //     required: true
+    // },
     projectUrl: {
         type: String,
         required: true
@@ -85,6 +85,14 @@ const projectSchema = new mongoose.Schema({
         type: String,
         enum: ['ongoing', 'completed', 'archived'],
         default: 'ongoing'
+    },
+    thumbnail: {
+        type: Buffer,
+        required: false //opsional
+    },
+    thumbnailContentType: {
+        type: String,
+        required: false
     }
 }, {
     timestamps: true

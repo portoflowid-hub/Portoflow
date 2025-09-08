@@ -16,7 +16,7 @@ const createProject = async (req, res) => {
             });
         }
 
-        const { title, description, isGroup, repoUrl, liveDemoUrl, imageUrl, projectUrl, tags, members } = req.body;
+        const { title, description, isGroup, repoUrl, liveDemoUrl, projectUrl, tags, members } = req.body;
         const ownerId = req.user.id;
 
         //check whether the project is exist
@@ -28,18 +28,52 @@ const createProject = async (req, res) => {
             });
         }
 
-        const newProject = await Project.create({
+        const projectData = {
             title,
             description,
             isGroup,
             repoUrl,
             liveDemoUrl,
-            imageUrl,
             projectUrl,
             tags,
             members,
             ownerId
-        });
+        };
+
+        //parse string json for array tags and members
+        if (members) {
+            try {
+                const parsedMembers = JSON.parse(members);
+                projectData.members = parsedMembers.map(member => ({
+                    ...member,
+                    joinedAt: new Date()
+                }));
+            } catch (err) {
+                return res.status(400).json({
+                    status: 'fail',
+                    message: 'Invalid members data format'
+                });
+            }
+        }
+
+        if (tags) {
+            try {
+                projectData.tags = JSON.parse(tags);
+            } catch (err) {
+                return res.status(400).json({
+                    status: 'fail',
+                    message: 'Invalid tags data format'
+                });
+            }
+        }
+
+        //if there are any images uploaded, add them to the project data
+        if (req.file) {
+            projectData.thumbnail = req.file.buffer;
+            projectData.thumbnailContentType = req.file.mimetype;
+        }
+        
+        const newProject = await Project.create(projectData);
 
         res.status(201).json({
             status: "success",
@@ -190,16 +224,57 @@ const deleteProject = async (req, res) => {
     }
 }
 
-// //multer configuration for temporary storage
-// const storage = multer.memoryStorage(); //save file on memory
-// const upload = multer({ storage });
+//upload project image
+const uploadImage = async (req, res) => {
+    const {projectId} = req.params;
+    const currentUserId = req.user.id;
 
-// //upload image for project
+    try {
+        const project = await Project.findById(projectId);
+        if (!project || project.ownerId.toString() !== currentUserId) {
+            return res.status(403).json({
+                status: 'fail',
+                message: 'Forbidden: You do not have permission to upload thumbnail for this project.'
+            });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({
+                status: 'fail',
+                message: 'Image file is required'
+            });
+        }
+
+        const updatedProject = await Project.findByIdAndUpdate(
+            projectId,
+            {
+                $set: {
+                    thumbnail: req.file.buffer,
+                    thumbnailContentType: req.file.mimetype
+                }
+            },
+            {new: true}
+        );
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Project thumbnail updated successfully',
+            data: updatedProject
+        });
+    } catch (err) {
+        res.status(500).json({
+            status: 'fail',
+            message: 'Failed to upload project thumbnail',
+            error: err.message
+        });
+    }
+}
 
 export {
     createProject,
     getMyProjects,
     updateProject,
     deleteProject,
-    getProjectById
+    getProjectById,
+    uploadImage
 };

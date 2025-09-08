@@ -4,7 +4,8 @@ import {
     getMyProjects, 
     updateProject, 
     deleteProject, 
-    getProjectById
+    getProjectById,
+    uploadImage
 } from '../controller/project/projectController.js';
 
 import {
@@ -21,11 +22,13 @@ import { getProjectsByUsername, getProjectsByTag, searchProjects } from '../cont
 import {removeMemberProject, updateMemberRole, addMemberProject} from '../controller/project/projectMemberController.js';
 import { getLikedProjects, getSavedProjects } from '../controller/project/userProjectController.js';
 import verifyToken from '../middleware/auth.js';
+import multer from 'multer';
 
 const projectRouter = express.Router();
+const upload = multer({storage: multer.memoryStorage()});
 
 //create project (user must log in)
-projectRouter.post('/api/createProject', verifyToken, createProject);
+projectRouter.post('/api/createProject', verifyToken, upload.single('image'), createProject);
 
 //get all my projects
 projectRouter.get('/api/getProjects', verifyToken, getMyProjects);
@@ -67,5 +70,8 @@ projectRouter.get('/api/projects/:projectId/comments', getProjectComments);
 projectRouter.post('/api/projects/:projectId/members', verifyToken, addMemberProject);
 projectRouter.delete('/api/projects/:projectId/members', verifyToken, removeMemberProject);
 projectRouter.patch('/api/projects/:projectId/members/role', verifyToken, updateMemberRole);
+
+//upload project image
+projectRouter.put('/api/projects/:projectId/thumbnail', verifyToken, upload.single('image'), uploadImage);
 
 export default projectRouter;
