@@ -3,8 +3,7 @@ import ProjectLike from "../../models/project/ProjectLike.js";
 import ProjectComment from "../../models/project/ProjectComment.js";
 import ProjectSaved from "../../models/project/ProjectSaved.js";
 import mongoose from "mongoose";
-import multer from "multer"; //for procecing file upload
-import path from "path";
+import {uploadToS3} from '../../services/storageService.js';
 
 //create project by user
 const createProject = async (req, res) => {
@@ -69,8 +68,8 @@ const createProject = async (req, res) => {
 
         //if there are any images uploaded, add them to the project data
         if (req.file) {
-            projectData.thumbnail = req.file.buffer;
-            projectData.thumbnailContentType = req.file.mimetype;
+            const imageUrl = await uploadToS3(req.file.buffer, req.file.mimetype);
+            projectData.imageUrl = imageUrl
         }
         
         const newProject = await Project.create(projectData);
@@ -81,7 +80,7 @@ const createProject = async (req, res) => {
             data: newProject
         });
     } catch (err) {
-        res.status(500).json({
+        res.status(400).json({
             status: "fail",
             message: err.message,
         });
@@ -245,12 +244,13 @@ const uploadImage = async (req, res) => {
             });
         }
 
+        const imageUrl = await uploadToS3(req.file.buffer, req.file.mimetype);
+
         const updatedProject = await Project.findByIdAndUpdate(
             projectId,
             {
                 $set: {
-                    thumbnail: req.file.buffer,
-                    thumbnailContentType: req.file.mimetype
+                    imageUrl: imageUrl
                 }
             },
             {new: true}

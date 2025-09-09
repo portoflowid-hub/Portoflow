@@ -14,11 +14,6 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 await connectedDB();
-app.use(express.json());
-app.use(cookieParser());
-app.use(userRouter);
-app.use(adminRouter);
-app.use(projectRouter);
 
 app.use(
   cors({
@@ -26,6 +21,12 @@ app.use(
     credentials: true,
   })
 );
+
+app.use(express.json());
+app.use(cookieParser());
+app.use(userRouter);
+app.use(adminRouter);
+app.use(projectRouter);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
