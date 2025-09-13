@@ -9,12 +9,10 @@ const enrollmentSchema = new mongoose.Schema({
   completedAt: { type: Date, default: null },
   progress: { type: Number, min: 0, max: 100, default: 0 },
   grade: { type: String, default: null },
-  metadata: { type: Object, default: {} } // place for paymentId, coupon, etc.
-}, {
-  timestamps: true
-});
+  metadata: { type: Object, default: {} }
+}, { timestamps: true });
 
-// Prevent duplicate enrollments for same user-course-role
+// prevent duplicate enrollment
 enrollmentSchema.index({ user: 1, course: 1, role: 1 }, { unique: true });
 
 export default mongoose.model('Enrollment', enrollmentSchema);
