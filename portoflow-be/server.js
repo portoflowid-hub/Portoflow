@@ -1,39 +1,40 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import connectedDB from './config/db.js';
-import userRouter from './router/userRoutes.js';
-import adminRouter from './router/adminRoutes.js';
-import courseRouter from './router/courseRoutes.js';
-import cookieParser from 'cookie-parser';
-import cors from 'cors';
-
-dotenv.config();
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import { connectedDB } from "./db.js"; // sesuaikan path
+import userRouter from "./routes/user.js";
+import adminRouter from "./routes/admin.js";
+import courseRouter from "./routes/course.js";
 
 const app = express();
-
-// diubdah ke 3000 agar tidak bentrol dengan frontend
 const PORT = process.env.PORT || 5000;
 
-// Pindahkan CORS ke bagian atas sebelum middleware lainnya
-// Ini memastikan semua permintaan yang masuk akan diperiksa kebijakannya terlebih dahulu
-app.use(
-  cors({
-    origin: "http://localhost:3000", 
-    credentials: true,
-  })
-);
-// middleware lainnya
+// CORS (pakai env untuk production)
+app.use(cors({
+  origin: process.env.CLIENT_ORIGIN || "http://localhost:3000",
+  credentials: true,
+}));
+
+// Middleware lain
 app.use(express.json());
 app.use(cookieParser());
 
-// router setelah middleware
+// Router
 app.use(userRouter);
 app.use(adminRouter);
 app.use(courseRouter);
 
-// Panggil koneksi DB
-await connectedDB();
+// Jalankan server setelah DB connect
+const start = async () => {
+  try {
+    await connectedDB();
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error("DB connection failed", err);
+    process.exit(1);
+  }
+};
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+start();
