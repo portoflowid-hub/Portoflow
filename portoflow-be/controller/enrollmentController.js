@@ -23,7 +23,7 @@ export const enrollCourse = async (req, res) => {
       const count = await Enrollment.countDocuments({
         course: courseId,
         role: 'student',
-        status: 'enrolled'
+        status: 'active' // 🟢 pakai status baru
       }).session(session)
       if (count >= course.capacity) {
         await session.abortTransaction()
@@ -35,7 +35,7 @@ export const enrollCourse = async (req, res) => {
 
     // create enrollment (unique index prevents duplicates)
     const enrollment = await Enrollment.create(
-      [{ user: userId, course: courseId, role: 'student', status: 'enrolled' }],
+      [{ user: userId, course: courseId, role: 'student', status: 'active' }],
       { session }
     )
 
@@ -88,10 +88,10 @@ export const unenrollCourse = async (req, res) => {
 export const listCourseStudents = async (req, res) => {
   try {
     const courseId = req.params.id
-    const { page = 1, limit = 20, q = '' } = req.query
+    const { page = 1, limit = 20 } = req.query
     const skip = (page - 1) * limit
 
-    const filter = { course: courseId, role: 'student', status: 'enrolled' }
+    const filter = { course: courseId, role: 'student', status: 'active' }
 
     const [rows, total] = await Promise.all([
       Enrollment.find(filter)
