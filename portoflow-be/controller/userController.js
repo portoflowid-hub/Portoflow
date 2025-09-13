@@ -215,6 +215,14 @@ const updateUser = async (req, res) => {
   try {
     const { id } = req.params
 
+    // Cek role: user biasa hanya boleh update dirinya sendiri
+    if (req.user.role !== 'admin' && req.user.id !== id) {
+      return res.status(403).json({
+        status: 'fail',
+        message: 'Forbidden: cannot update other users'
+      })
+    }
+
     const updateData = req.body
     const updatedUser = await User.findByIdAndUpdate(id, updateData, {
       new: true,
@@ -222,7 +230,7 @@ const updateUser = async (req, res) => {
     })
 
     if (!updatedUser) {
-      res.status(404).json({
+      return res.status(404).json({
         status: 'fail',
         message: 'User not found'
       })
@@ -237,7 +245,8 @@ const updateUser = async (req, res) => {
         username: updatedUser.username,
         email: updatedUser.email,
         dateOfBirth: updatedUser.dateOfBirth,
-        gender: updatedUser.gender
+        gender: updatedUser.gender,
+        role: updatedUser.role
       }
     })
   } catch (error) {
@@ -265,12 +274,19 @@ const deleteUser = async (req, res) => {
   try {
     const { id } = req.params
 
+    // Hanya admin yang bisa delete user
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        status: 'fail',
+        message: 'Forbidden: only admin can delete users'
+      })
+    }
+
     const deletedUser = await User.findByIdAndDelete(id)
     if (!deletedUser) {
-      res.status(404).json({
+      return res.status(404).json({
         status: 'fail',
-        message: 'User not found',
-        data: deletedUser
+        message: 'User not found'
       })
     }
 

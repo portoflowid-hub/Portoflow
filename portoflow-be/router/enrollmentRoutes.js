@@ -33,7 +33,7 @@ router.get('/api/my-enrollments', verifyToken, getMyEnrollments)
 router.get(
   '/api/courses/:id/students',
   verifyToken,
-  authorizeRoles('admin', 'instructor', 'ta'),
+  authorizeRoles('admin'),
   listCourseStudents
 )
 
@@ -41,7 +41,7 @@ router.get(
 router.put(
   '/api/enrollments/:enrollmentId',
   verifyToken,
-  authorizeRoles('admin', 'instructor'),
+  authorizeRoles('admin'),
   updateEnrollment
 )
 

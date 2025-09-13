@@ -4,7 +4,7 @@ import Enrollment from '../models/Enrollment.js'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
-const ALLOWED_ROLES = ['admin', 'instructor', 'ta', 'student']
+const ALLOWED_ROLES = ['admin', 'user']
 
 // Helper: generate tokens and set cookies
 const generateTokens = async (user, res) => {

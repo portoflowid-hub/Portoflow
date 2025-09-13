@@ -17,9 +17,9 @@ courseRouter.get('/api/courses', getAllCourses);
 courseRouter.get('/api/courses/:id', getCourseById);
 
 // Rute otentikasi
-courseRouter.post('/api/courses', verifyToken, createCourse);
-courseRouter.put('/api/courses/:id', verifyToken, updateCourse);
-courseRouter.delete('/api/courses/:id', verifyToken, deleteCourse);
+courseRouter.post('/api/courses', verifyToken, authorizeRoles('admin'), createCourse);
+courseRouter.put('/api/courses/:id', verifyToken, authorizeRoles('admin'), updateCourse);
+courseRouter.delete('/api/courses/:id', verifyToken, authorizeRoles('admin'), deleteCourse);
 
 // Rute untuk ambil daftar mahasiswa yang terdaftar dalam kursus tertentu
 courseRouter.get('/api/courses/:id/students', verifyToken, listCourseStudents);

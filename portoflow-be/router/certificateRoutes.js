@@ -36,7 +36,7 @@ router.get('/api/certificates/:id', verifyToken, getCertificateById)
 router.get(
   '/api/certificates',
   verifyToken,
-  authorizeRoles('admin', 'instructor'),
+  authorizeRoles('admin'),
   getCertificates
 )
 
@@ -44,7 +44,7 @@ router.get(
 router.put(
   '/api/certificates/:id',
   verifyToken,
-  authorizeRoles('admin', 'instructor'),
+  authorizeRoles('admin'),
   updateCertificate
 )
 
@@ -52,7 +52,7 @@ router.put(
 router.delete(
   '/api/certificates/:id',
   verifyToken,
-  authorizeRoles('admin', 'instructor'),
+  authorizeRoles('admin'),
   deleteCertificate
 )
 

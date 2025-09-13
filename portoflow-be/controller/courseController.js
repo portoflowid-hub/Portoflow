@@ -126,27 +126,19 @@ export const getCourseById = async (req, res) => {
   }
 }
 
-// POST /api/courses
+// Helper: check if user is admin
+const isAdmin = (user) => user?.role === 'admin';
+
+// POST /api/courses (admin only)
 export const createCourse = async (req, res) => {
   try {
-    const {
-      title,
-      description = '',
-      price = 0,
-      capacity,
-      tags = [],
-      category = '',
-      level = 'beginner',
-      language,
-      imageUrl,
-      isPublished
-    } = req.body
-
-    if (!title) {
-      return res
-        .status(400)
-        .json({ status: 'fail', message: 'Title is required' })
+    if (!isAdmin(req.user)) {
+      return res.status(403).json({ status: 'fail', message: 'Forbidden: only admin can create courses' });
     }
+
+    const { title, description = '', price = 0, capacity, tags = [], category = '', level = 'beginner', language, imageUrl, isPublished } = req.body;
+
+    if (!title) return res.status(400).json({ status: 'fail', message: 'Title is required' });
 
     const course = await Course.create({
       title,
@@ -160,89 +152,70 @@ export const createCourse = async (req, res) => {
       language,
       imageUrl,
       isPublished: !!isPublished
-    })
+    });
 
-    const created = await Course.findById(course._id).populate(
-      'createdBy',
-      'username email'
-    )
+    const created = await Course.findById(course._id).populate('createdBy', 'username email');
 
-    res
-      .status(201)
-      .json({ status: 'success', message: 'Course created', data: created })
+    res.status(201).json({ status: 'success', message: 'Course created', data: created });
   } catch (err) {
-    if (err.code === 11000)
-      return res
-        .status(400)
-        .json({ status: 'fail', message: 'Duplicate field' })
-    res.status(500).json({ status: 'error', message: err.message })
+    if (err.code === 11000) return res.status(400).json({ status: 'fail', message: 'Duplicate field' });
+    res.status(500).json({ status: 'error', message: err.message });
   }
-}
+};
 
-// PUT /api/courses/:id
+// PUT /api/courses/:id (admin only)
 export const updateCourse = async (req, res) => {
   try {
-    const { id } = req.params
-    const updates = { ...req.body }
+    if (!isAdmin(req.user)) {
+      return res.status(403).json({ status: 'fail', message: 'Forbidden: only admin can update courses' });
+    }
 
-    delete updates.createdBy // jangan ubah pembuat kursus
+    const { id } = req.params;
+    const updates = { ...req.body };
+    delete updates.createdBy;
 
-    // if capacity decreased, check jumlah student
     if (typeof updates.capacity !== 'undefined' && updates.capacity !== null) {
-      const currentEnrolled = await Enrollment.countDocuments({
-        course: id,
-        role: 'student',
-        status: 'enrolled'
-      })
+      const currentEnrolled = await Enrollment.countDocuments({ course: id, role: 'student', status: 'enrolled' });
       if (updates.capacity < currentEnrolled) {
         return res.status(400).json({
           status: 'fail',
           message: `Capacity cannot be less than current enrolled (${currentEnrolled})`
-        })
+        });
       }
     }
 
-    const course = await Course.findByIdAndUpdate(id, updates, {
-      new: true,
-      runValidators: true
-    }).populate('createdBy', 'username email')
+    const course = await Course.findByIdAndUpdate(id, updates, { new: true, runValidators: true }).populate('createdBy', 'username email');
 
-    if (!course) {
-      return res
-        .status(404)
-        .json({ status: 'fail', message: 'Course not found' })
-    }
+    if (!course) return res.status(404).json({ status: 'fail', message: 'Course not found' });
 
-    res
-      .status(200)
-      .json({ status: 'success', message: 'Course updated', data: course })
+    res.status(200).json({ status: 'success', message: 'Course updated', data: course });
   } catch (err) {
     if (err.name === 'ValidationError') {
-      const errors = Object.values(err.errors).map(e => e.message)
-      return res.status(400).json({ status: 'fail', errors })
+      const errors = Object.values(err.errors).map(e => e.message);
+      return res.status(400).json({ status: 'fail', errors });
     }
-    res.status(500).json({ status: 'error', message: err.message })
+    res.status(500).json({ status: 'error', message: err.message });
   }
-}
+};
 
-// DELETE /api/courses/:id
+// DELETE /api/courses/:id (admin only)
 export const deleteCourse = async (req, res) => {
   try {
-    const { id } = req.params
-    const deleted = await Course.findByIdAndDelete(id)
-    if (!deleted) {
-      return res
-        .status(404)
-        .json({ status: 'fail', message: 'Course not found' })
+    if (!isAdmin(req.user)) {
+      return res.status(403).json({ status: 'fail', message: 'Forbidden: only admin can delete courses' });
     }
 
-    await Enrollment.deleteMany({ course: id })
+    const { id } = req.params;
+    const deleted = await Course.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ status: 'fail', message: 'Course not found' });
 
-    res.status(200).json({ status: 'success', message: 'Course deleted' })
+    await Enrollment.deleteMany({ course: id });
+
+    res.status(200).json({ status: 'success', message: 'Course deleted' });
   } catch (err) {
-    res.status(500).json({ status: 'error', message: err.message })
+    res.status(500).json({ status: 'error', message: err.message });
   }
-}
+};
 
 // GET /api/courses/:id/students
 export const listCourseStudents = async (req, res) => {
