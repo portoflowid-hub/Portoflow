@@ -23,7 +23,7 @@ export const enrollCourse = async (req, res) => {
       const count = await Enrollment.countDocuments({
         course: courseId,
         role: 'student',
-        status: 'active' // 🟢 pakai status baru
+        status: 'active'
       }).session(session)
       if (count >= course.capacity) {
         await session.abortTransaction()

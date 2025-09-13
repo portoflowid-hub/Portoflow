@@ -1,6 +1,6 @@
+// controllers/certificateController.js
 import Certificate from '../models/Certificate.js'
 import Course from '../models/Course.js'
-import Enrollment from '../models/Enrollment.js'
 import mongoose from 'mongoose'
 import multer from 'multer'
 import { uploadToS3 } from '../services/storageService.js'
@@ -17,16 +17,13 @@ const sendResponse = (res, status, success, data = null, message = '') => {
 // ========== CLIENT ==========
 
 // Upload sertifikat (Client)
-// Upload sertifikat (Client)
 export const uploadCertificate = async (req, res) => {
   try {
-    // --- Pastikan user ada di token
     if (!req.user || !req.user._id) {
       return sendResponse(res, 401, false, null, 'Unauthorized: user not found')
     }
     const user = req.user._id
-
-    const { course, enrollment } = req.body
+    const { course } = req.body
 
     // --- Validasi ObjectId course
     if (!mongoose.Types.ObjectId.isValid(course)) {
@@ -56,7 +53,7 @@ export const uploadCertificate = async (req, res) => {
       return sendResponse(res, 400, false, null, 'Certificate file is required')
     }
 
-    // --- Validasi tipe file (hanya PDF/JPG/PNG)
+    // --- Validasi tipe file
     const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg']
     if (!allowedTypes.includes(req.file.mimetype)) {
       return sendResponse(
@@ -68,16 +65,13 @@ export const uploadCertificate = async (req, res) => {
       )
     }
 
-    // --- Upload ke S3 (pakai buffer dari multer memoryStorage)
+    // --- Upload ke S3
     const fileUrl = await uploadToS3(req.file.buffer, req.file.mimetype)
 
     // --- Buat sertifikat baru
     const certificate = new Certificate({
       user,
       course,
-      enrollment: mongoose.Types.ObjectId.isValid(enrollment)
-        ? new mongoose.Types.ObjectId(enrollment)
-        : null,
       fileUrl,
       issuedAt: new Date()
     })
@@ -102,7 +96,7 @@ export const getMyCertificates = async (req, res) => {
   try {
     const user = req.user._id
 
-    const certificates = await Certificate.find({ user, isDeleted: false })
+    const certificates = await Certificate.find({ user })
       .populate('course', 'title')
       .sort({ createdAt: -1 })
 
@@ -118,11 +112,10 @@ export const getMyCertificates = async (req, res) => {
   }
 }
 
-// Ambil sertifikat berdasarkan ID (Client/Admin)
+// Ambil sertifikat berdasarkan ID
 export const getCertificateById = async (req, res) => {
   try {
     const { id } = req.params
-
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return sendResponse(res, 400, false, null, 'Invalid certificate ID')
     }
@@ -131,8 +124,9 @@ export const getCertificateById = async (req, res) => {
       .populate('user', 'fullName email')
       .populate('course', 'title')
 
-    if (!cert || cert.isDeleted)
+    if (!cert) {
       return sendResponse(res, 404, false, null, 'Certificate not found')
+    }
 
     return sendResponse(
       res,
@@ -148,12 +142,11 @@ export const getCertificateById = async (req, res) => {
 
 // ========== ADMIN ==========
 
-// Ambil semua sertifikat (Admin) dengan pagination & filter
+// Ambil semua sertifikat (Admin)
 export const getCertificates = async (req, res) => {
   try {
     const { page = 1, limit = 10, courseId, userId } = req.query
-    const query = { isDeleted: false }
-
+    const query = {}
     if (courseId) query.course = courseId
     if (userId) query.user = userId
 
@@ -187,7 +180,6 @@ export const getCertificates = async (req, res) => {
 export const updateCertificate = async (req, res) => {
   try {
     const { id } = req.params
-
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return sendResponse(res, 400, false, null, 'Invalid certificate ID')
     }
@@ -197,8 +189,9 @@ export const updateCertificate = async (req, res) => {
       runValidators: true
     })
 
-    if (!cert || cert.isDeleted)
+    if (!cert) {
       return sendResponse(res, 404, false, null, 'Certificate not found')
+    }
 
     return sendResponse(
       res,
@@ -218,30 +211,25 @@ export const updateCertificate = async (req, res) => {
   }
 }
 
-// Delete sertifikat (Admin)
+// Delete sertifikat (Admin) — hard delete
 export const deleteCertificate = async (req, res) => {
   try {
     const { id } = req.params
-
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return sendResponse(res, 400, false, null, 'Invalid certificate ID')
     }
 
-    const cert = await Certificate.findByIdAndUpdate(
-      id,
-      { isDeleted: true },
-      { new: true }
-    )
-
-    if (!cert)
+    const cert = await Certificate.findByIdAndDelete(id)
+    if (!cert) {
       return sendResponse(res, 404, false, null, 'Certificate not found')
+    }
 
     return sendResponse(
       res,
       200,
       true,
       null,
-      'Certificate deleted successfully (soft delete)'
+      'Certificate deleted successfully'
     )
   } catch (err) {
     return sendResponse(res, 500, false, null, err.message || 'Server error')

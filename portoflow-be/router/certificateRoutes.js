@@ -1,3 +1,4 @@
+// routes/certificateRoutes.js
 import express from 'express'
 import {
   uploadCertificate,
@@ -8,15 +9,17 @@ import {
   deleteCertificate,
   uploadMiddleware
 } from '../controller/certificateController.js'
-import verifyToken from '../middleware/auth.js'   // <--- IMPORT MIDDLEWARE AUTH
+import verifyToken from '../middleware/auth.js'
+import { authorizeRoles } from '../middleware/roleCheck.js'
 
 const router = express.Router()
 
 // ========== CLIENT ==========
-// Upload sertifikat (pakai middleware multer + auth)
+
+// Upload sertifikat (hanya user login)
 router.post(
   '/api/certificates/upload',
-  verifyToken,          // <--- WAJIB supaya req.user keisi
+  verifyToken,
   uploadMiddleware,
   uploadCertificate
 )
@@ -28,8 +31,29 @@ router.get('/api/certificates/me', verifyToken, getMyCertificates)
 router.get('/api/certificates/:id', verifyToken, getCertificateById)
 
 // ========== ADMIN ==========
-router.get('/api/certificates', verifyToken, getCertificates)
-router.put('/api/certificates/:id', verifyToken, updateCertificate)
-router.delete('/api/certificates/:id', verifyToken, deleteCertificate)
+
+// Ambil semua sertifikat
+router.get(
+  '/api/certificates',
+  verifyToken,
+  authorizeRoles('admin', 'instructor'),
+  getCertificates
+)
+
+// Update sertifikat
+router.put(
+  '/api/certificates/:id',
+  verifyToken,
+  authorizeRoles('admin', 'instructor'),
+  updateCertificate
+)
+
+// Hapus sertifikat
+router.delete(
+  '/api/certificates/:id',
+  verifyToken,
+  authorizeRoles('admin', 'instructor'),
+  deleteCertificate
+)
 
 export default router
