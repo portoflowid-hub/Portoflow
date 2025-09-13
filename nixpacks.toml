@@ -1,0 +1,15 @@
+# nixpacks.toml
+
+# 1. Tentukan 'provider' untuk menyiapkan lingkungan Node.js
+providers = ["node"]
+
+# 2. Atur fase 'install'
+[phases.install]
+# Perintah untuk instalasi, dijalankan dari dalam folder backend
+cmds = ["cd ./portoflow-be && npm install"]
+# Tentukan di mana cache harus disimpan untuk mempercepat build selanjutnya
+cacheDirectories = ["./portoflow-be/node_modules"]
+
+# 3. Atur fase 'start' (menjalankan aplikasi)
+[start]
+command = "cd ./portoflow-be && npm start"
