@@ -1,16 +1,31 @@
+/* globals.css (MODIFIKASI PENUH UNTUK TEMA TERANG & GELAP) */
+
 * {
   box-sizing: border-box;
 }
 
+/* TEMA TERANG (DEFAULT) */
 :root {
-  --background-dark: #0D0C1D; 
-  --text-light: #F0F0F0;      
-  --text-secondary: #a8a4d1; 
-  --accent-purple: #7F5AF0;  
-  --button-bg: #FFFFFF;      
-  --button-text: #0D0C1D;     
-  --card-stroke: rgba(127, 90, 240, 0.3);
+  --background: #F9F9F9;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --accent-purple: #7F5AF0;
+  --card-background: #FFFFFF;
+  --card-stroke: #E5E7EB;
+  --navbar-background: rgba(255, 255, 255, 0.8);
 }
+
+/* TEMA GELAP (AKAN AKTIF JIKA ADA class="dark" PADA <html>) */
+html.dark {
+  --background: #0D0C1D;
+  --text-primary: #F0F0F0;
+  --text-secondary: #a8a4d1;
+  --accent-purple: #7F5AF0;
+  --card-background: #16152a;
+  --card-stroke: rgba(127, 90, 240, 0.3);
+  --navbar-background: rgba(0, 0, 0, 0.7);
+}
+
 
 html,
 body {
@@ -19,14 +34,27 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
     Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
     sans-serif;
-
-  height: 100%; /*Jika tidak diatur, tinggi elemen body hanya akan mengikuti kontennya (bisa kurang dari tinggi layar).*/
-  width: 100%; /*praktik umum atau best practice*/
-  overflow-x: hidden; /*menghilangkan Scrollbar Horizontal*/
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
   scroll-behavior: smooth;
-    
-  /* syintax umum -> background: radial-gradient(shape-position, color1, color2, ...); */
-  background: radial-gradient(circle at bottom, #312c84, #0b0415, #000); /*gradasi melingkar*/
+  
+  /* Transisi halus saat berganti tema */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body {
+  background: var(--background);
+  color: var(--text-primary);
+}
+
+html.dark body {
+  background: radial-gradient(circle at bottom, #312c84, #0b0415, #000);
+}
+
+
+body::-webkit-scrollbar {
+  display: none;
 }
 
 a {

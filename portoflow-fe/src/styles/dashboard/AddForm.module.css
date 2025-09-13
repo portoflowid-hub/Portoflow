@@ -18,6 +18,10 @@
   font-weight: 500;
 }
 
+.textarea::-webkit-scrollbar {
+  display: none;
+}
+
 .input, .textarea {
   background-color: #0f0e1a;
   border: 1px solid #4a4a70;
