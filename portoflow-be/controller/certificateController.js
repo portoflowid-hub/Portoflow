@@ -1,10 +1,15 @@
-import Certificate from '../models/Sertificate.js'
-import User from '../models/User.js'
+import Certificate from '../models/Certificate.js'
 import Course from '../models/Course.js'
 import Enrollment from '../models/Enrollment.js'
 import mongoose from 'mongoose'
+import multer from 'multer'
+import { uploadToS3 } from '../services/storageService.js'
 
-// Response formatter
+// ========= Multer =========
+const upload = multer({ storage: multer.memoryStorage() })
+export const uploadMiddleware = upload.single('file')
+
+// ========= Helper Response =========
 const sendResponse = (res, status, success, data = null, message = '') => {
   return res.status(status).json({ success, data, message })
 }
@@ -12,58 +17,30 @@ const sendResponse = (res, status, success, data = null, message = '') => {
 // ========== CLIENT ==========
 
 // Upload sertifikat (Client)
+// Upload sertifikat (Client)
 export const uploadCertificate = async (req, res) => {
   try {
-    const { course, enrollment, fileUrl } = req.body
+    // --- Pastikan user ada di token
+    if (!req.user || !req.user._id) {
+      return sendResponse(res, 401, false, null, 'Unauthorized: user not found')
+    }
     const user = req.user._id
 
-    // Validasi ObjectId
+    const { course, enrollment } = req.body
+
+    // --- Validasi ObjectId course
     if (!mongoose.Types.ObjectId.isValid(course)) {
       return sendResponse(res, 400, false, null, 'Invalid course ID')
     }
 
-    // Cek course
+    // --- Cek course ada atau tidak
     const existingCourse = await Course.findById(course)
-    if (!existingCourse)
+    if (!existingCourse) {
       return sendResponse(res, 404, false, null, 'Course not found')
-
-    // Cek enrollment jika ada
-    if (enrollment) {
-      if (!mongoose.Types.ObjectId.isValid(enrollment)) {
-        return sendResponse(res, 400, false, null, 'Invalid enrollment ID')
-      }
-
-      const existingEnrollment = await Enrollment.findById(enrollment)
-      if (!existingEnrollment)
-        return sendResponse(res, 404, false, null, 'Enrollment not found')
-
-      if (existingEnrollment.user.toString() !== user.toString()) {
-        return sendResponse(
-          res,
-          403,
-          false,
-          null,
-          'Enrollment does not belong to this user'
-        )
-      }
-
-      if (existingEnrollment.status !== 'completed') {
-        return sendResponse(
-          res,
-          400,
-          false,
-          null,
-          'User has not completed this course yet'
-        )
-      }
     }
 
-    // Cek duplikat sertifikat
-    const alreadyCert = await Certificate.findOne({
-      user,
-      course,
-      isDeleted: false
-    })
+    // --- Cek apakah sertifikat sudah pernah dibuat
+    const alreadyCert = await Certificate.findOne({ user, course })
     if (alreadyCert) {
       return sendResponse(
         res,
@@ -74,16 +51,39 @@ export const uploadCertificate = async (req, res) => {
       )
     }
 
-    // Buat sertifikat baru
+    // --- Pastikan file ada
+    if (!req.file) {
+      return sendResponse(res, 400, false, null, 'Certificate file is required')
+    }
+
+    // --- Validasi tipe file (hanya PDF/JPG/PNG)
+    const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg']
+    if (!allowedTypes.includes(req.file.mimetype)) {
+      return sendResponse(
+        res,
+        400,
+        false,
+        null,
+        'Invalid file type. Only PDF, JPG, or PNG are allowed'
+      )
+    }
+
+    // --- Upload ke S3 (pakai buffer dari multer memoryStorage)
+    const fileUrl = await uploadToS3(req.file.buffer, req.file.mimetype)
+
+    // --- Buat sertifikat baru
     const certificate = new Certificate({
       user,
       course,
-      enrollment,
+      enrollment: mongoose.Types.ObjectId.isValid(enrollment)
+        ? new mongoose.Types.ObjectId(enrollment)
+        : null,
       fileUrl,
       issuedAt: new Date()
     })
 
     await certificate.save()
+
     return sendResponse(
       res,
       201,
@@ -92,6 +92,7 @@ export const uploadCertificate = async (req, res) => {
       'Certificate uploaded successfully'
     )
   } catch (err) {
+    console.error(err)
     return sendResponse(res, 500, false, null, err.message || 'Server error')
   }
 }
