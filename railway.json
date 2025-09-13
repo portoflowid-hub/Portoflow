@@ -1,5 +1,9 @@
 {
   "build": {
+    "builder": "NIXPACKS",
     "root": "portoflow-be"
+  },
+  "deploy": {
+    "startCommand": "npm run start"
   }
 }
