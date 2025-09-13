@@ -1,5 +1,3 @@
-// src/pages/login.js
-
 import { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -18,7 +16,8 @@ const LoginPage = () => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/login', {
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE; // 🔑 ambil dari env var
+      const response = await fetch(`${API_BASE}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -49,19 +48,37 @@ const LoginPage = () => {
           <form className={styles.form} onSubmit={handleSubmit}>
             <div className={styles.inputGroup}>
               <label htmlFor="email" className={styles.label}>Email</label>
-              <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} className={styles.input} required />
+              <input 
+                type="email" 
+                id="email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                className={styles.input} 
+                required 
+              />
             </div>
             <div className={styles.inputGroup}>
               <label htmlFor="password" className={styles.label}>Password</label>
-              <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} className={styles.input} required />
+              <input 
+                type="password" 
+                id="password" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                className={styles.input} 
+                required 
+              />
             </div>
             {error && <p style={{color: 'red', fontSize: '0.9rem'}}>{error}</p>}
             <button type="submit" className={styles.submitButton}>Masuk</button>
           </form>
 
           <div className={styles.separator}>ATAU</div>
-          <button type="button" className={styles.googleButton}><FcGoogle size={22} /> Lanjutkan dengan Google</button>
-          <p className={styles.redirectText}>Belum punya akun? <Link href="/register">Daftar sekarang</Link></p>
+          <button type="button" className={styles.googleButton}>
+            <FcGoogle size={22} /> Lanjutkan dengan Google
+          </button>
+          <p className={styles.redirectText}>
+            Belum punya akun? <Link href="/register">Daftar sekarang</Link>
+          </p>
         </div>
       </div>
     </>
