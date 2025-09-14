@@ -4,6 +4,7 @@ import connectedDB from './config/db.js';
 import userRouter from './router/userRoutes.js';
 import adminRouter from './router/adminRoutes.js';
 import projectRouter from './router/projectRoutes.js';
+import oauthRouter from './router/oauthRoutes.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
@@ -27,6 +28,7 @@ app.use(cookieParser());
 app.use(userRouter);
 app.use(adminRouter);
 app.use(projectRouter);
+app.use(oauthRouter);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

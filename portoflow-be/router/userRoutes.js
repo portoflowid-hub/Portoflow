@@ -10,6 +10,7 @@ import {
     logout
 } from '../controller/user/userController.js';
 import verifyToken from '../middleware/auth.js';
+import {requestOtp, verifyOtp} from '../controller/authOTP/authOtpController.js';
 
 const userRouter = express.Router();
 
@@ -21,5 +22,7 @@ userRouter.delete('/api/user/:id', verifyToken, deleteUser);
 userRouter.put('/api/user/:id', verifyToken, updateUser);
 userRouter.post('/api/getToken', getToken);
 userRouter.post('/api/logout', logout);
+userRouter.post('/api/request-otp', requestOtp);
+userRouter.post('/api/verify-otp', verifyOtp);
 
 export default userRouter;
