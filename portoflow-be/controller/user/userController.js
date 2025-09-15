@@ -1,6 +1,9 @@
-import User from '../../models/user/User.js'
-import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
+import User from '../../models/user/User.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import OTP from '../../models/otpEmail/OtpEmail.js';
+import otpGenerator from 'otp-generator';
+import { sendOtpEmail } from '../../config/email.js';
 
 const register = async (req, res) => {
   try {
@@ -38,10 +41,17 @@ const register = async (req, res) => {
       password: hashedPassword,
       dateOfBirth,
       gender,
-      role: 'user'
+      role: 'user',
+      isVerified: false
     })
 
-    await user.save()
+    await user.save();
+
+    //sent otp after regist
+    const otp = otpGenerator.generate(6, {upperCaseAlphabets: false, specialChars: false});
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    await OTP.create({userId: user._id, otp, expiresAt});
+    await sendOtpEmail(email, otp);
 
     res.status(201).json({
       status: 'success',
@@ -52,6 +62,60 @@ const register = async (req, res) => {
       status: 'error',
       error: error.message
     })
+  }
+}
+
+const verifyRegistrationOtp = async (req, res) => {
+  try {
+    const {email, otp} = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Email and OTP is required'
+      });
+    }
+
+    const user = await User.findOne({email});
+    if (!user) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'User not found'
+      });
+    }
+
+    const otpRecord = await OTP.findOne({
+      userId: user._id,
+      otp, 
+      expiresAt: {$gt: new Date()}
+    });
+
+    if (!otpRecord) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Invalid or expired OTP.'
+      });
+    }
+
+    if (!user.isVerified) {
+      user.isVerified = true,
+      await user.save();
+    }
+
+    await OTP.deleteOne({_id: otpRecord._id});
+
+    const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '1h'});
+
+    res.status(200).json({
+      status: 'fail',
+      message: 'Email verified. Your account is active now',
+      token
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'fail',
+      message: err.message
+    });
   }
 }
 
@@ -113,6 +177,7 @@ const login = async (req, res) => {
     })
   }
 }
+
 
 const getToken = async (req, res) => {
   try {
@@ -309,5 +374,6 @@ export {
   deleteUser,
   updateUser,
   getToken,
-  logout
+  logout,
+  verifyRegistrationOtp,
 }
