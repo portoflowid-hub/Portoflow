@@ -12,14 +12,15 @@ import {
 } from '../controller/user/userController.js';
 import verifyToken from '../middleware/auth.js';
 import {requestOtp, verifyOtp} from '../controller/authOTP/authOtpController.js';
+import { authorizeRoles } from '../middleware/roleCheck.js';
 
 const userRouter = express.Router();
 
 userRouter.post('/api/login', login);
 userRouter.post('/api/register', register);
-userRouter.get('/api/getUsers', getAllUsers);
+userRouter.get('/api/getUsers', verifyToken, authorizeRoles('admin'), getAllUsers);
 userRouter.get('/api/user/:id', verifyToken, getUser);
-userRouter.delete('/api/user/:id',  deleteUser);
+userRouter.delete('/api/user/:id', verifyToken, deleteUser);
 userRouter.put('/api/user/:id', verifyToken, updateUser);
 userRouter.post('/api/getToken', getToken);
 userRouter.post('/api/logout', logout);
@@ -28,6 +29,7 @@ userRouter.post('/api/verify-otp', verifyOtp);
 userRouter.post('/api/verify-registration-otp', verifyRegistrationOtp);
 
 export default userRouter;
+
 
 import express from 'express';
 import { 
