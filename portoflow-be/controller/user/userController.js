@@ -1,9 +1,6 @@
-import User from '../../models/user/User.js';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import OTP from '../../models/otpEmail/OtpEmail.js';
-import otpGenerator from 'otp-generator';
-import { sendOtpEmail } from '../../config/email.js';
+import User from '../models/User.js'
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 
 const register = async (req, res) => {
   try {
@@ -41,17 +38,10 @@ const register = async (req, res) => {
       password: hashedPassword,
       dateOfBirth,
       gender,
-      role: 'user',
-      isVerified: false
+      role: 'user'
     })
 
-    await user.save();
-
-    //sent otp after regist
-    const otp = otpGenerator.generate(6, {upperCaseAlphabets: false, specialChars: false});
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-    await OTP.create({userId: user._id, otp, expiresAt});
-    await sendOtpEmail(email, otp);
+    await user.save()
 
     res.status(201).json({
       status: 'success',
@@ -62,60 +52,6 @@ const register = async (req, res) => {
       status: 'error',
       error: error.message
     })
-  }
-}
-
-const verifyRegistrationOtp = async (req, res) => {
-  try {
-    const {email, otp} = req.body;
-
-    if (!email || !otp) {
-      return res.status(400).json({
-        status: 'fail',
-        message: 'Email and OTP is required'
-      });
-    }
-
-    const user = await User.findOne({email});
-    if (!user) {
-      return res.status(404).json({
-        status: 'fail',
-        message: 'User not found'
-      });
-    }
-
-    const otpRecord = await OTP.findOne({
-      userId: user._id,
-      otp, 
-      expiresAt: {$gt: new Date()}
-    });
-
-    if (!otpRecord) {
-      return res.status(400).json({
-        status: 'fail',
-        message: 'Invalid or expired OTP.'
-      });
-    }
-
-    if (!user.isVerified) {
-      user.isVerified = true,
-      await user.save();
-    }
-
-    await OTP.deleteOne({_id: otpRecord._id});
-
-    const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '1h'});
-
-    res.status(200).json({
-      status: 'fail',
-      message: 'Email verified. Your account is active now',
-      token
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: 'fail',
-      message: err.message
-    });
   }
 }
 
@@ -143,7 +79,7 @@ const login = async (req, res) => {
     }
 
     const safeUserData = {
-      id: user._id,
+      id: user.id,
       username: user.username,
       role: user.role
     }
@@ -161,7 +97,7 @@ const login = async (req, res) => {
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000
+      maxAge: 7 * 24 * 60 * 60 * 100
     })
 
     res.status(200).json({
@@ -177,7 +113,6 @@ const login = async (req, res) => {
     })
   }
 }
-
 
 const getToken = async (req, res) => {
   try {
@@ -280,6 +215,14 @@ const updateUser = async (req, res) => {
   try {
     const { id } = req.params
 
+    // Cek role: user biasa hanya boleh update dirinya sendiri
+    if (req.user.role !== 'admin' && req.user.id !== id) {
+      return res.status(403).json({
+        status: 'fail',
+        message: 'Forbidden: cannot update other users'
+      })
+    }
+
     const updateData = req.body
     const updatedUser = await User.findByIdAndUpdate(id, updateData, {
       new: true,
@@ -287,7 +230,7 @@ const updateUser = async (req, res) => {
     })
 
     if (!updatedUser) {
-      res.status(404).json({
+      return res.status(404).json({
         status: 'fail',
         message: 'User not found'
       })
@@ -302,7 +245,8 @@ const updateUser = async (req, res) => {
         username: updatedUser.username,
         email: updatedUser.email,
         dateOfBirth: updatedUser.dateOfBirth,
-        gender: updatedUser.gender
+        gender: updatedUser.gender,
+        role: updatedUser.role
       }
     })
   } catch (error) {
@@ -330,12 +274,19 @@ const deleteUser = async (req, res) => {
   try {
     const { id } = req.params
 
+    // Hanya admin yang bisa delete user
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        status: 'fail',
+        message: 'Forbidden: only admin can delete users'
+      })
+    }
+
     const deletedUser = await User.findByIdAndDelete(id)
     if (!deletedUser) {
-      res.status(404).json({
+      return res.status(404).json({
         status: 'fail',
-        message: 'User not found',
-        data: deletedUser
+        message: 'User not found'
       })
     }
 
@@ -374,6 +325,5 @@ export {
   deleteUser,
   updateUser,
   getToken,
-  logout,
-  verifyRegistrationOtp,
+  logout
 }
