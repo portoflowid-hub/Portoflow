@@ -1,5 +1,5 @@
-import Enrollment from '../models/Enrollment.js'
-import Course from '../models/Course.js'
+import Enrollment from '../../models/enrollment/Enrollment.js'
+import Course from '../../models/course/Course.js'
 import mongoose from 'mongoose'
 
 // Enroll current user as student (atomic: check capacity => create enrollment)

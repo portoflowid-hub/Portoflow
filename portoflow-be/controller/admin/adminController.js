@@ -1,6 +1,6 @@
-import User from '../models/User.js'
-import Course from '../models/Course.js'
-import Enrollment from '../models/Enrollment.js'
+import User from '../../models/user/User.js'
+import Course from '../../models/course/Course.js'
+import Enrollment from '../../models/enrollment/Enrollment.js'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 

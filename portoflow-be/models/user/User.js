@@ -39,10 +39,13 @@ const userSchema = new mongoose.Schema(
       enum: ['admin', 'user', 'instructor', 'ta'],
       default: 'user'
     },
+    googleRefreshToken: {
+      type: String
+    },
     avatarUrl: { type: String, trim: true, default: '' },
-    refreshToken: {
-      type: String,
-      default: null
+    isVerified: {
+      type: Boolean,
+      default: false
     }
   },
   {

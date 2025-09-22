@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
-import User from '../models/User.js'
-import Course from '../models/Course.js'
-import Enrollment from '../models/Enrollment.js'
+import User from '../../models/user/User.js'
+import Course from '../../models/course/Course.js'
+import Enrollment from '../../models/enrollment/Enrollment.js'
 
 // util: validate array of ids exist in User collection
 const validateUserIds = async (ids = []) => {
