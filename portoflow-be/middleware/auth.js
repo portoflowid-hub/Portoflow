@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 
 const verifyToken = async (req, res, next) => {
-  let token = null //Tambahan Baru
+  let token = null
   const authHeader = req.headers['authorization']
 
   if (!authHeader || !authHeader.startsWith('Bearer')) {
@@ -11,7 +11,6 @@ const verifyToken = async (req, res, next) => {
     })
   }
 
-  // Tambahan Baru
   if (authHeader && authHeader.startsWith('Bearer ')) {
     token = authHeader.split(' ')[1]
   } else if (req.cookies?.accessToken) {
@@ -21,7 +20,19 @@ const verifyToken = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
-    req.user = decoded
+    // ✅ pastikan req.user selalu punya _id
+    req.user = {
+      _id: decoded._id || decoded.id, // bisa dua-duanya
+      email: decoded.email || null,
+      role: decoded.role || null
+    }
+
+    if (!req.user._id) {
+      return res.status(401).json({
+        status: 'fail',
+        message: 'Unauthorized: user not found in token'
+      })
+    }
 
     next()
   } catch (error) {
