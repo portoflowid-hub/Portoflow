@@ -1,38 +1,16 @@
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
+import { v4 as uuidv4 } from 'uuid'
 
 const certificateSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: [true, 'Certificate name is required'],
-        trim: true
-    },
-    issuer: {
-        type: String,
-        required: [true, 'Issuer name is required'],
-        trim: true
-    },
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
-    fileUrl: {
-        type: String,
-        required: [true, 'File URL is required'],
-        trim: true
-    },
-    issueDate: {
-        type: Date,
-        required: [true, 'Issue date is required']
-    },
-    credentialID: {
-        type: String,
-        trim: true
-    }
-},{
-    timestamps: true
-});
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true, index: true },
+  // enrollment: { type: mongoose.Schema.Types.ObjectId, ref: 'Enrollment', default: null }, // optional
+  issuedAt: { type: Date, default: Date.now },
+  certificateId: { type: String, required: true, unique: true, default: () => uuidv4() },
+  fileUrl: { type: String, trim: true, required: true }
+}, { timestamps: true });
 
-const Certificate = mongoose.model('Certificate', certificateSchema);
+// 1 user hanya bisa punya 1 sertifikat per course
+certificateSchema.index({ user: 1, course: 1 }, { unique: true });
 
-export default Certificate;
+export default mongoose.model('Certificate', certificateSchema);
