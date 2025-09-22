@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import connectedDB from './config/db.js';
 import userRouter from './router/userRoutes.js';
 import adminRouter from './router/adminRoutes.js';
+import courseRouter from './router/courseRoutes.js';
+import certificateRouter from './router/certificateRoutes.js';
 import projectRouter from './router/projectRoutes.js';
 import oauthRouter from './router/oauthRoutes.js';
 import cookieParser from 'cookie-parser';
@@ -26,6 +28,8 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 app.use(userRouter);
+app.use(courseRouter);
+app.use(certificateRouter);
 app.use(adminRouter);
 app.use(projectRouter);
 app.use(oauthRouter);
