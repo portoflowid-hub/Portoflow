@@ -1,19 +1,48 @@
-import express from 'express';
-import { enrollCourse, unenrollCourse, listCourseStudents, getMyEnrollments, updateEnrollment } from '../controller/enrollmentController.js';
-import verifyToken from '../middleware/auth.js';
-import { authorizeRoles } from '../middleware/roleCheck.js';
+// routes/enrollmentRoutes.js
+import express from 'express'
+import {
+  enrollCourse,
+  unenrollCourse,
+  listCourseStudents,
+  getMyEnrollments,
+  updateEnrollment
+} from '../controller/enrollmentController.js'
+import verifyToken from '../middleware/auth.js'
+import { authorizeRoles } from '../middleware/roleCheck.js'
 
-const router = express.Router();
+const router = express.Router()
 
-// student enroll/unenroll (user must be logged in)
-router.post('/api/courses/:id/enroll', verifyToken, enrollCourse);
-router.delete('/api/courses/:id/enroll', verifyToken, unenrollCourse);
+// ======================
+// Student actions
+// ======================
 
-// get my enrollments
-router.get('/api/my-enrollments', verifyToken, getMyEnrollments);
+// Enroll course
+router.post('/api/courses/:id/enroll', verifyToken, enrollCourse)
 
-// admin/instructor endpoints
-router.get('/api/courses/:id/students', verifyToken, authorizeRoles('admin','instructor','ta'), listCourseStudents);
-router.put('/api/enrollments/:enrollmentId', verifyToken, authorizeRoles('admin','instructor'), updateEnrollment);
+// Unenroll course
+router.delete('/api/courses/:id/enroll', verifyToken, unenrollCourse)
 
-export default router;
+// Get all my enrollments
+router.get('/api/my-enrollments', verifyToken, getMyEnrollments)
+
+// ======================
+// Admin / Instructor actions
+// ======================
+
+// List students in a course
+router.get(
+  '/api/courses/:id/students',
+  verifyToken,
+  authorizeRoles('admin'),
+  listCourseStudents
+)
+
+// Update enrollment (role/status/progress/grade)
+router.put(
+  '/api/enrollments/:enrollmentId',
+  verifyToken,
+  authorizeRoles('admin'),
+  updateEnrollment
+)
+
+export default router
